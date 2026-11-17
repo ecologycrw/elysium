@@ -37,5 +37,5 @@ Write-Output 'Trecho de docs/STATUS.md:'
 $status | ForEach-Object { Write-Output "  $_" }
 Write-Output ''
 Write-Output "Propostas abertas em docs/PROPOSALS.md: $openProposals"
-Write-Output 'Regras: AGENTS.md (carregado pelo CLAUDE.md). Para orientar o dono, use /status.'
+Write-Output 'Regras: AGENTS.md (carregado pelo CLAUDE.md). Para orientar o dono, use /situacao.'
 exit 0

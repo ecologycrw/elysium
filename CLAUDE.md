@@ -6,7 +6,7 @@ O `AGENTS.md`, importado acima, contém as regras. Aqui fica só o que é espec�
 
 ## Skills
 
-Os comandos do ciclo ficam em `.claude/skills/`: `/status`, `/planejar`, `/implementar`, `/verificar`, `/revisar`, `/fechar`, `/retrospectiva`, `/consolidar` e `/propor`. Quando o dono pedir algo que corresponde a uma etapa, use a skill dessa etapa.
+Os comandos do ciclo ficam em `.claude/skills/`: `/situacao`, `/planejar`, `/implementar`, `/verificar`, `/revisar`, `/fechar`, `/retrospectiva`, `/consolidar` e `/propor`. Quando o dono pedir algo que corresponde a uma etapa, use a skill dessa etapa.
 
 ## Subagentes
 

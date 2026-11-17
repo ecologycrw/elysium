@@ -32,7 +32,7 @@ flowchart LR
 7. **`/retrospectiva`** registra o feedback, processa as propostas e sugere de 1 a 3 próximas fatias, com uma recomendação. Ela roda **no mesmo PR**, porque a `main` só muda por PR aprovado: assim o dono aprova uma vez só, já com a retrospectiva incluída.
 8. O dono aprova o PR e faz o squash merge.
 
-Outras skills: `/status` (onde estamos), `/propor` (registrar uma proposta) e `/consolidar` (a faxina periódica).
+Outras skills: `/situacao` (onde estamos), `/propor` (registrar uma proposta) e `/consolidar` (a faxina periódica).
 
 ## Specs
 
