@@ -19,6 +19,7 @@ public sealed class MapSimulation
     private readonly SortedDictionary<EntityId, MapEntity> _entities = [];
     private readonly AreaOfInterestGrid _grid;
     private readonly SortedSet<EntityId> _scratch = [];
+    private readonly List<TilePosition> _pathScratch = [];
 
     public MapSimulation(GridMap map, MapRules rules, IClientOutbox outbox)
     {
@@ -85,10 +86,67 @@ public sealed class MapSimulation
         return false;
     }
 
-    /// <summary>Runs one tick.</summary>
+    /// <summary>
+    /// The player asks to walk to <paramref name="destination"/>. The server checks it, finds the path and
+    /// replaces any path in progress; the character then walks one tile per step interval, in <see cref="Tick"/>.
+    /// A refused request is answered with <see cref="MoveRejected"/>, and the character stops where it is.
+    /// </summary>
+    public void RequestMove(EntityId id, TilePosition destination)
+    {
+        if (!_entities.TryGetValue(id, out var entity))
+        {
+            return;
+        }
+
+        MoveRejectReason? reason = null;
+        if (!_map.Contains(destination))
+        {
+            reason = MoveRejectReason.OutOfMap;
+        }
+        else if (!_map.IsWalkable(destination))
+        {
+            reason = MoveRejectReason.Blocked;
+        }
+        else if (!GridPathfinder.TryFindPath(_map, entity.Position, destination, _rules.MaxPathLength, _pathScratch))
+        {
+            reason = MoveRejectReason.Unreachable;
+        }
+
+        entity.Path.Clear();
+        if (reason is { } refused)
+        {
+            _outbox.Send(id, new MoveRejected(destination, refused));
+            return;
+        }
+
+        foreach (var step in _pathScratch)
+        {
+            entity.Path.Enqueue(step);
+        }
+    }
+
+    /// <summary>
+    /// Runs one tick: every character with a path whose step interval has passed takes exactly one step.
+    /// </summary>
     public void Tick()
     {
         CurrentTick++;
+        foreach (var entity in _entities.Values)
+        {
+            if (entity.Path.Count == 0 || CurrentTick < entity.NextStepTick)
+            {
+                continue;
+            }
+
+            var from = entity.Position;
+            var to = entity.Path.Dequeue();
+            entity.Position = to;
+            entity.NextStepTick = CurrentTick + _rules.TicksPerStep;
+            _grid.Move(entity.Id, from, to);
+
+            _outbox.Send(entity.Id, new EntityMoved(entity.Id, to));
+            UpdateVisibility(entity, moved: true);
+        }
     }
 
     /// <summary>
