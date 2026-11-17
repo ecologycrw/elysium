@@ -16,6 +16,7 @@
     <ProjectReference Include="../../src/framework/Elysium.Classic.Server/Elysium.Classic.Server.csproj" />
     <ProjectReference Include="../../samples/Elysium.Demo.Server/Elysium.Demo.Server.csproj" />
     <ProjectReference Include="../../samples/Elysium.Demo.Client/Elysium.Demo.Client.csproj" />
+    <ProjectReference Include="../../samples/Elysium.Demo.Shared/Elysium.Demo.Shared.csproj" />
   </ItemGroup>
 
 </Project>

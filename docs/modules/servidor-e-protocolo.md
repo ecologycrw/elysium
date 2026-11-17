@@ -59,7 +59,7 @@ tiles
 ....#....
 ```
 
-`.` é livre e `#` é bloqueado; todas as linhas têm a mesma largura. O mapa do jogo de demonstração fica em `samples/Elysium.Demo.Server/Data/demo.map`.
+`.` é livre e `#` é bloqueado; todas as linhas têm a mesma largura. O mapa do jogo de demonstração fica em `samples/Elysium.Demo.Shared/Data/demo.map`, lido pelo servidor e pelo cliente.
 
 ## Como usar
 

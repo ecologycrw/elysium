@@ -1,67 +1,72 @@
 using System.Diagnostics;
-using System.Globalization;
-using System.Numerics;
+using Elysium.Classic.Client.Presentation;
 using Elysium.Core.Client.Input;
 using Elysium.Core.Client.Rendering;
 using Elysium.Core.Client.Sdl;
+using Elysium.Demo.Client;
 
-// The Elysium Demo client. Slice 1, T08 checkpoint: draws a fixed scene (a floor of tiles and a few blocks)
-// through the scene renderer, prints each click in pixels, and shows the graphics API and the frames per second
-// in the title. T09 turns it into the real client. Close the window to quit.
-// Usage: dotnet run --project samples/Elysium.Demo.Client
+// The Elysium Demo client: logs in with the given name, opens the window and lets the player click the ground to
+// walk. The title shows the name, the frames per second and when the connection to the server fell.
+// Usage: dotnet run --project samples/Elysium.Demo.Client -- --name Ana [--host 127.0.0.1] [--port 7000]
+// Everything runs on the main thread, as the window requires; only the network works in the background.
 
-const string Title = "Elysium Demo";
-
-using var window = SdlWindow.Open(Title, 1280, 720);
-using var renderer = SdlGpuRenderer.Create(window);
-Console.WriteLine($"Drawing with {renderer.DriverName}. Click the window to see the pixel; close it to quit.");
-
-var input = new FrameInput();
-var scene = new Scene
+if (!ClientArguments.TryParse(args, out var arguments, out var error))
 {
-    Light = new DirectionalLight(new Vector3(-0.4f, -1, -0.6f), new ColorRgb(1, 0.95f, 0.85f), new ColorRgb(0.35f, 0.35f, 0.4f)),
-    Background = new ColorRgb(0.12f, 0.14f, 0.18f),
-};
-for (var row = -5; row <= 5; row++)
-{
-    for (var column = -5; column <= 5; column++)
-    {
-        var shade = (row + column) % 2 == 0 ? 0.45f : 0.4f;
-        scene.Add(new SceneBlock(new Vector3(column, -0.05f, row), new Vector3(0.96f, 0.1f, 0.96f), new ColorRgb(0.3f, shade, 0.3f)));
-    }
+    Console.Error.WriteLine(error);
+    return 2;
 }
 
-scene.Add(new SceneBlock(new Vector3(2, 0.3f, -1), new Vector3(0.96f, 0.6f, 0.96f), new ColorRgb(0.45f, 0.45f, 0.5f)));
-scene.Add(new SceneBlock(new Vector3(0, 0.7f, 0), new Vector3(0.5f, 1.4f, 0.5f), new ColorRgb(0.2f, 0.45f, 0.9f)));
-scene.Add(new SceneBlock(new Vector3(-2, 0.7f, 1), new Vector3(0.5f, 1.4f, 0.5f), new ColorRgb(0.9f, 0.55f, 0.2f)));
-
-var clock = Stopwatch.StartNew();
-var frames = 0;
-var lastTitleUpdate = TimeSpan.Zero;
-while (true)
+// Waiting here keeps the program on the main thread, where the window must be opened and used.
+var login = DemoLogin.LogInAsync(arguments!, CancellationToken.None).GetAwaiter().GetResult();
+if (login.Link is null)
 {
-    window.PollEvents(input);
-    if (input.CloseRequested)
-    {
-        break;
-    }
+    Console.Error.WriteLine($"Could not log in as '{arguments!.Name}': {login.Failure}.");
+    return 1;
+}
 
-    foreach (var click in input.Clicks)
-    {
-        Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{click.Button} click at ({click.Position.X:0}, {click.Position.Y:0})"));
-    }
+var session = new ClientSession(login.Link, DemoLook.CreateWorld());
+try
+{
+    using var window = SdlWindow.Open(WindowTitle.Format(arguments!.Name, 0, null), 1280, 720);
+    using var renderer = SdlGpuRenderer.Create(window);
+    Console.WriteLine($"Logged in as {arguments.Name}, drawing with {renderer.DriverName}. Close the window to quit.");
+    RunFrames(window, renderer, session, arguments.Name);
+}
+finally
+{
+    session.DisposeAsync().AsTask().GetAwaiter().GetResult();
+}
 
-    var view = Matrix4x4.CreateLookAt(new Vector3(0, 9, 8), Vector3.Zero, Vector3.UnitY);
-    var projection = Matrix4x4.CreatePerspectiveFieldOfView(MathF.PI / 4, (float)input.ViewportWidth / input.ViewportHeight, 0.1f, 100f);
-    scene.ViewProjection = view * projection;
-    renderer.Draw(scene);
+return 0;
 
-    frames++;
-    if (clock.Elapsed - lastTitleUpdate >= TimeSpan.FromSeconds(1))
+// Runs frames until the player closes the window, updating the title once a second.
+static void RunFrames(SdlWindow window, SdlGpuRenderer renderer, ClientSession session, string name)
+{
+    var input = new FrameInput();
+    var scene = new Scene();
+    var clock = Stopwatch.StartNew();
+    var lastFrame = TimeSpan.Zero;
+    var lastTitle = TimeSpan.Zero;
+    var framesSinceTitle = 0;
+    while (true)
     {
-        var fps = frames / (clock.Elapsed - lastTitleUpdate).TotalSeconds;
-        window.SetTitle(string.Create(CultureInfo.InvariantCulture, $"{Title} - {renderer.DriverName} - {fps:0} FPS"));
-        frames = 0;
-        lastTitleUpdate = clock.Elapsed;
+        window.PollEvents(input);
+        if (input.CloseRequested)
+        {
+            return;
+        }
+
+        var now = clock.Elapsed;
+        session.RunFrame(input, now - lastFrame, scene);
+        renderer.Draw(scene);
+        lastFrame = now;
+
+        framesSinceTitle++;
+        if (now - lastTitle >= TimeSpan.FromSeconds(1))
+        {
+            window.SetTitle(WindowTitle.Format(name, framesSinceTitle / (now - lastTitle).TotalSeconds, session.LostReason));
+            framesSinceTitle = 0;
+            lastTitle = now;
+        }
     }
 }

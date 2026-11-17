@@ -2,6 +2,7 @@
   <Folder Name="/samples/">
     <Project Path="samples/Elysium.Demo.Client/Elysium.Demo.Client.csproj" />
     <Project Path="samples/Elysium.Demo.Server/Elysium.Demo.Server.csproj" />
+    <Project Path="samples/Elysium.Demo.Shared/Elysium.Demo.Shared.csproj" />
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/core/">
@@ -24,6 +25,7 @@
     <Project Path="tests/Elysium.Core.Client.Tests/Elysium.Core.Client.Tests.csproj" />
     <Project Path="tests/Elysium.Core.Server.Tests/Elysium.Core.Server.Tests.csproj" />
     <Project Path="tests/Elysium.Core.Tests/Elysium.Core.Tests.csproj" />
+    <Project Path="tests/Elysium.Demo.Client.Tests/Elysium.Demo.Client.Tests.csproj" />
     <Project Path="tests/Elysium.Demo.Server.Tests/Elysium.Demo.Server.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">

@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/core/Elysium.Core.Client.Sdl/Elysium.Core.Client.Sdl.csproj" />
+    <ProjectReference Include="../../src/framework/Elysium.Classic.Client/Elysium.Classic.Client.csproj" />
+    <ProjectReference Include="../Elysium.Demo.Shared/Elysium.Demo.Shared.csproj" />
   </ItemGroup>
 
 </Project>
