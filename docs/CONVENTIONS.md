@@ -50,6 +50,12 @@ Formato: `tipo(escopo): descrição curta em inglês`
 - Estado mutável compartilhado entre mapas.
 - Otimização sem medição.
 
+## APIs proibidas na simulação
+
+Os projetos `*.Server` e `*.Shared` não podem usar relógio do sistema, `Random`, locks, `Thread.Sleep` nem console (lista em `src/BannedSymbols.txt`; INV-03 e INV-04). O build falha se alguém usar.
+
+A única exceção é o arquivo que implementa o relógio real ou o RNG real do servidor. Ele usa `#pragma warning disable RS0030` com um comentário explicando o motivo. O revisor confere todo `#pragma` desse tipo, e nenhum outro arquivo pode ter um.
+
 ## Regra de três
 
 Uma abstração só nasce quando o mesmo problema aparece pela terceira vez. Na primeira vez, resolve-se direto. Na segunda, nota-se a repetição. Na terceira, abstrai-se, já sabendo o que de fato se repete. A regra vale também para criar projetos novos.

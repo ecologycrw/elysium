@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="TngTech.ArchUnitNET" />
+  </ItemGroup>
+
+  <!-- Every project in src/ and samples/ must be referenced here.
+       ProjectCoverageTests fails when a project is missing, so no project escapes these rules. -->
+  <ItemGroup>
+    <ProjectReference Include="../../src/core/Elysium.Core/Elysium.Core.csproj" />
+    <ProjectReference Include="../../src/core/Elysium.Core.Server/Elysium.Core.Server.csproj" />
+    <ProjectReference Include="../../src/core/Elysium.Core.Client/Elysium.Core.Client.csproj" />
+    <ProjectReference Include="../../src/framework/Elysium.Classic.Shared/Elysium.Classic.Shared.csproj" />
+    <ProjectReference Include="../../src/framework/Elysium.Classic.Server/Elysium.Classic.Server.csproj" />
+  </ItemGroup>
+
+</Project>

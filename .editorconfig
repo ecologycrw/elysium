@@ -1,0 +1,81 @@
+# Code style for the whole repository. Enforced at build time (EnforceCodeStyleInBuild)
+# and by `dotnet format`. This file is a protected "trava" (see docs/WORKFLOW.md).
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,yaml,xml,csproj,props,targets,slnx}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.ps1]
+charset = utf-8-bom
+
+[*.cs]
+# Namespaces: file-scoped, and they must match the folder structure
+csharp_style_namespace_declarations = file_scoped:error
+dotnet_style_namespace_match_folder = true
+dotnet_diagnostic.IDE0130.severity = error
+dotnet_diagnostic.IDE0161.severity = error
+
+# Usings
+dotnet_sort_system_directives_first = true
+csharp_using_directive_placement = outside_namespace:error
+dotnet_diagnostic.IDE0065.severity = error
+
+# Braces are always required
+csharp_prefer_braces = true:error
+dotnet_diagnostic.IDE0011.severity = error
+
+# Formatting
+dotnet_diagnostic.IDE0055.severity = error
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+
+# Language preferences
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+dotnet_style_readonly_field = true:error
+dotnet_diagnostic.IDE0044.severity = error
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:error
+dotnet_diagnostic.IDE0040.severity = error
+
+# Naming: private fields are _camelCase; types, methods, properties and constants are PascalCase
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel.capitalization = camel_case
+dotnet_naming_style.underscore_camel.required_prefix = _
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel
+dotnet_naming_rule.private_fields_underscore.severity = error
+
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.required_modifiers = const
+dotnet_naming_style.pascal.capitalization = pascal_case
+dotnet_naming_rule.constants_pascal.symbols = constants
+dotnet_naming_rule.constants_pascal.style = pascal
+dotnet_naming_rule.constants_pascal.severity = error
+
+dotnet_naming_symbols.static_readonly_fields.applicable_kinds = field
+dotnet_naming_symbols.static_readonly_fields.required_modifiers = static, readonly
+dotnet_naming_rule.static_readonly_pascal.symbols = static_readonly_fields
+dotnet_naming_rule.static_readonly_pascal.style = pascal
+dotnet_naming_rule.static_readonly_pascal.severity = error
+
+dotnet_diagnostic.IDE1006.severity = error
+
+# Disabled rules (each one with the reason)
+# CA1716: flags names that are keywords in Visual Basic (for example "Shared").
+#         The engine is C#-only, so VB interoperability is not a goal.
+dotnet_diagnostic.CA1716.severity = none

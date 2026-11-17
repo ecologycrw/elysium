@@ -1,0 +1,27 @@
+#!/bin/sh
+# Elysium pre-commit hook: blocks the commit when something is wrong.
+# Never skip it with --no-verify (docs/WORKFLOW.md). The CI runs the same checks again.
+set -eu
+
+if [ -z "$(git diff --cached --name-only)" ]; then
+  exit 0
+fi
+
+echo "[pre-commit] secret scan"
+sh .githooks/scan-secrets.sh
+
+# Only Markdown files staged? Then the docs check is enough.
+if git diff --cached --name-only | grep -qvE '\.md$'; then
+  echo "[pre-commit] formatting"
+  dotnet format whitespace Elysium.slnx --verify-no-changes
+  echo "[pre-commit] build"
+  dotnet build Elysium.slnx --nologo -v q
+  echo "[pre-commit] tests"
+  dotnet test --solution Elysium.slnx --no-build
+  echo "[pre-commit] checks"
+  dotnet run --project tools/Elysium.Checks --no-build -- all
+else
+  echo "[pre-commit] docs check (only Markdown files changed)"
+  dotnet build tools/Elysium.Checks/Elysium.Checks.csproj --nologo -v q
+  dotnet run --project tools/Elysium.Checks --no-build -- docs
+fi

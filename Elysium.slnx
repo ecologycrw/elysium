@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/core/">
+    <Project Path="src/core/Elysium.Core.Client/Elysium.Core.Client.csproj" />
+    <Project Path="src/core/Elysium.Core.Server/Elysium.Core.Server.csproj" />
+    <Project Path="src/core/Elysium.Core/Elysium.Core.csproj" />
+  </Folder>
+  <Folder Name="/src/framework/">
+    <Project Path="src/framework/Elysium.Classic.Server/Elysium.Classic.Server.csproj" />
+    <Project Path="src/framework/Elysium.Classic.Shared/Elysium.Classic.Shared.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Elysium.Architecture.Tests/Elysium.Architecture.Tests.csproj" />
+    <Project Path="tests/Elysium.Checks.Tests/Elysium.Checks.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Elysium.Checks/Elysium.Checks.csproj" />
+  </Folder>
+</Solution>

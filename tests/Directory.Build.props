@@ -1,0 +1,19 @@
+<Project>
+  <!-- Settings for every test project. Imports the root Directory.Build.props first. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <IsAotCompatible>false</IsAotCompatible>
+    <IsTestProject>true</IsTestProject>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <!-- xUnit v3 runs on Microsoft.Testing.Platform (enabled in global.json). -->
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

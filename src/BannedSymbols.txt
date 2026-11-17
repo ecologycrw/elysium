@@ -1,0 +1,22 @@
+// Banned APIs in simulation code: every project named *.Server or *.Shared.
+// Why: INV-03 (a map actor never blocks and never shares mutable state)
+//      and INV-04 (the simulation is deterministic).
+// The only allowed exception is the single file that implements the real clock or the real RNG,
+// using `#pragma warning disable RS0030` plus a comment that explains why. The reviewer checks every pragma.
+
+P:System.DateTime.Now;Use the injected simulation clock (INV-04)
+P:System.DateTime.UtcNow;Use the injected simulation clock (INV-04)
+P:System.DateTime.Today;Use the injected simulation clock (INV-04)
+P:System.DateTimeOffset.Now;Use the injected simulation clock (INV-04)
+P:System.DateTimeOffset.UtcNow;Use the injected simulation clock (INV-04)
+P:System.Environment.TickCount;Use the injected simulation clock (INV-04)
+P:System.Environment.TickCount64;Use the injected simulation clock (INV-04)
+T:System.Diagnostics.Stopwatch;Use the injected simulation clock (INV-04)
+M:System.Random.#ctor;Use the server RNG (INV-04)
+M:System.Random.#ctor(System.Int32);Use the server RNG (INV-04)
+P:System.Random.Shared;Use the server RNG (INV-04)
+M:System.Threading.Thread.Sleep(System.Int32);Never block a map actor (INV-03)
+M:System.Threading.Thread.Sleep(System.TimeSpan);Never block a map actor (INV-03)
+T:System.Threading.Monitor;No locks inside the simulation (INV-03)
+T:System.Threading.Lock;No locks inside the simulation (INV-03)
+T:System.Console;Use logging instead of the console
