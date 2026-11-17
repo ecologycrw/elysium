@@ -1,0 +1,35 @@
+# Build output
+bin/
+obj/
+artifacts/
+TestResults/
+*.trx
+coverage*/
+*.nupkg
+*.snupkg
+
+# IDEs
+.vs/
+.idea/
+*.user
+*.suo
+.vscode/*
+!.vscode/extensions.json
+
+# Tools
+node_modules/
+StrykerOutput/
+
+# Claude Code: per-machine local settings
+.claude/settings.local.json
+
+# Secrets: never committed
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.p12
+id_rsa*
+id_ed25519*
+secrets.json
