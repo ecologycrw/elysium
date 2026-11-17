@@ -15,12 +15,7 @@ Formato de cada entrada (o modelo completo fica em `templates/proposal.md`):
 
 ## Abertas
 
-### P-0004: os testes de arquitetura quebram com uma dependência sem namespace
-- Origem: fatia 1, T04
-- Tipo: trava, bug
-- Evidência: o `ServerLink` usava `Task.WhenAll(a, b)`. No .NET 10, essa chamada usa a versão com `params ReadOnlySpan<Task>`, e o compilador gera ajudantes internos (`InlineArrayElementRef` e `InlineArrayAsReadOnlySpan`, em `<PrivateImplementationDetails>`) cujos tipos genéricos não têm namespace. O `EngineModel.ForbiddenDependencies` lê `dependency.Target.Namespace.FullName` sem conferir se o namespace existe (`tests/Elysium.Architecture.Tests/EngineModel.cs`, linha 47), e dois testes de camadas falham com `NullReferenceException`, sem dizer o motivo. Foi contornado no `ServerLink` com duas esperas simples, mas qualquer código novo com a mesma construção quebra o teste de novo, e o erro não ajuda a achar a causa. Sugestão: tratar um alvo sem namespace como fora das camadas do Elysium (ele nunca é uma dependência proibida) e criar um teste que prove isso.
-- Prioridade sugerida: média
-- Status: aberta
+*(nenhuma)*
 
 ## Processadas
 
@@ -52,3 +47,11 @@ Formato de cada entrada (o modelo completo fica em `templates/proposal.md`):
 - Prioridade sugerida: média
 - Status: aceita
 - Destino: fatia 1, como tarefa de trava. O dono aprova a ferramenta e a nota mínima junto com a spec da fatia 1.
+
+### P-0004: os testes de arquitetura quebram com uma dependência sem namespace
+- Origem: fatia 1, T04
+- Tipo: trava, bug
+- Evidência: o `ServerLink` usava `Task.WhenAll(a, b)`. No .NET 10, essa chamada usa a versão com `params ReadOnlySpan<Task>`, e o compilador gera ajudantes internos (`InlineArrayElementRef` e `InlineArrayAsReadOnlySpan`, em `<PrivateImplementationDetails>`) cujos tipos genéricos não têm namespace. O `EngineModel.ForbiddenDependencies` lê `dependency.Target.Namespace.FullName` sem conferir se o namespace existe (`tests/Elysium.Architecture.Tests/EngineModel.cs`, linha 47), e dois testes de camadas falham com `NullReferenceException`, sem dizer o motivo. Foi contornado no `ServerLink` com duas esperas simples, mas qualquer código novo com a mesma construção quebra o teste de novo, e o erro não ajuda a achar a causa. Sugestão: tratar um alvo sem namespace como fora das camadas do Elysium (ele nunca é uma dependência proibida) e criar um teste que prove isso.
+- Prioridade sugerida: média
+- Status: aceita
+- Destino: trava. Aprovada pelo dono em 2026-11-17 para ser corrigida na própria fatia 1, como a tarefa T04b, antes da T05. Decisão do dono: o teste de arquitetura ignora dependências sem namespace, porque elas nunca são tipos do Elysium; se a leitura de um tipo falhar por outro motivo, o erro diz qual tipo causou a falha; um teste prova as duas coisas (`EngineModelTests`, com o código de exemplo `Fixtures/InlineArrayFixture.cs`). O `ServerLink` voltou para o `Task.WhenAll`, que é mais claro.

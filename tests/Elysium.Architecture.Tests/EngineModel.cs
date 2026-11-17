@@ -1,5 +1,6 @@
 using System.Reflection;
 using ArchUnitNET.Loader;
+using IType = ArchUnitNET.Domain.IType;
 using ArchModel = ArchUnitNET.Domain.Architecture;
 
 namespace Elysium.Architecture.Tests;
@@ -30,28 +31,52 @@ internal static class EngineModel
 
     /// <summary>
     /// Returns every dependency from a type whose namespace matches <paramref name="isSource"/>
-    /// to a type whose namespace matches <paramref name="isForbiddenTarget"/>.
+    /// to a type whose namespace matches <paramref name="isForbiddenTarget"/>, in every engine and game project.
     /// </summary>
-    public static List<string> ForbiddenDependencies(Func<string, bool> isSource, Func<string, bool> isForbiddenTarget)
-    {
-        var violations = new SortedSet<string>(StringComparer.Ordinal);
-        foreach (var type in Model.Types)
-        {
-            if (!isSource(type.Namespace.FullName))
-            {
-                continue;
-            }
+    public static List<string> ForbiddenDependencies(Func<string, bool> isSource, Func<string, bool> isForbiddenTarget) =>
+        ForbiddenDependencies(Model, isSource, isForbiddenTarget);
 
-            foreach (var dependency in type.Dependencies)
+    /// <summary>
+    /// Same as above, in any <paramref name="model"/>. A dependency without a namespace is skipped: it is never an
+    /// Elysium type, only something the compiler generates, like the type parameters of the inline array helpers
+    /// behind <c>Task.WhenAll(first, second)</c> (P-0004). If reading a type fails for any other reason, the error
+    /// names that type.
+    /// </summary>
+    public static List<string> ForbiddenDependencies(ArchModel model, Func<string, bool> isSource, Func<string, bool> isForbiddenTarget)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        var violations = new SortedSet<string>(StringComparer.Ordinal);
+        foreach (var type in model.Types)
+        {
+            try
             {
-                if (isForbiddenTarget(dependency.Target.Namespace.FullName))
-                {
-                    violations.Add($"{type.FullName} -> {dependency.Target.FullName}");
-                }
+                AddForbiddenDependencies(type, isSource, isForbiddenTarget, violations);
+            }
+            catch (Exception exception)
+            {
+                // Broad on purpose: whatever went wrong, the message must say which type it was (P-0004).
+                throw new InvalidOperationException($"Could not check the dependencies of {type.FullName}: {exception.Message}", exception);
             }
         }
 
         return [.. violations];
+    }
+
+    private static void AddForbiddenDependencies(
+        IType type, Func<string, bool> isSource, Func<string, bool> isForbiddenTarget, SortedSet<string> violations)
+    {
+        if (type.Namespace?.FullName is not { } sourceNamespace || !isSource(sourceNamespace))
+        {
+            return;
+        }
+
+        foreach (var dependency in type.Dependencies)
+        {
+            if (dependency.Target.Namespace?.FullName is { } targetNamespace && isForbiddenTarget(targetNamespace))
+            {
+                violations.Add($"{type.FullName} -> {dependency.Target.FullName}");
+            }
+        }
     }
 
     private static ArchModel BuildModel()

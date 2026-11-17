@@ -56,8 +56,7 @@ public sealed class ServerLink : IAsyncDisposable
         MarkLost("the game closed the connection");
         await _stopping.CancelAsync().ConfigureAwait(false);
         await _connection.DisposeAsync().ConfigureAwait(false);
-        await _receiving.ConfigureAwait(false);
-        await _sending.ConfigureAwait(false);
+        await Task.WhenAll(_receiving, _sending).ConfigureAwait(false);
         _stopping.Dispose();
     }
 
