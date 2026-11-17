@@ -9,11 +9,11 @@ atualizado-em: 2026-11-17
 
 ## Agora
 
-**Fatia 1 (Dois jogadores se veem): spec aprovada.** Ver [a spec](../specs/0001-dois-jogadores-se-veem/spec.md) e [o plano](../specs/0001-dois-jogadores-se-veem/plan.md). A implementação ainda não começou.
+**Fatia 1 (Dois jogadores se veem): em implementação.** T01 (testes de mutação) e T02 (protótipo gráfico, ADR 0012 aceito) concluídas. O PR #5 está aberto como rascunho, para a CI rodar o job `mutation` desde já. Ver [a spec](../specs/0001-dois-jogadores-se-veem/spec.md) e o [tasks.md](../specs/0001-dois-jogadores-se-veem/tasks.md).
 
 ## Próxima ação
 
-`/implementar` a fatia 1, começando pelo `tasks.md`. Paradas previstas: se o Stryker.NET não funcionar com o xUnit v3, e no fim do protótipo gráfico, para o dono aprovar o ADR 0012 e a ferramenta de shaders.
+`/implementar` a T03 (estado do mundo em `Elysium.Classic.Client`). Passo do dono, quando quiser: tornar o check `mutation` obrigatório (passo 10 de `docs/setup/GITHUB.md`).
 
 ## Bloqueios
 
@@ -38,3 +38,4 @@ Nenhum.
 | 2026-11-17 | O dono testou a fatia 0 (testes, cenário dos bots e `Ctrl+C`: tudo certo) e aprovou o ADR 0011. Retrospectiva: P-0001 e P-0002 aplicadas (skill `/planejar`, régua de qualidade, revisor e analisadores de complexidade com os limites padrão), P-0003 vai para a fatia 1, e a próxima fatia é a 1 |
 | 2026-11-17 | PR #4 mergeado: fatia 0 concluída |
 | 2026-11-17 | Fatia 1 planejada; o dono aprovou a spec, a biblioteca `ppy.SDL3-CS`, o Stryker.NET (nota mínima de 80%, bloqueando o PR), as mudanças em `Directory.Packages.props`, `Elysium.Architecture.Tests` e na CI, a mudança no piso de hardware da VISION e os destinos dos itens provisórios novos (fatia 2). ROADMAP atualizado: fatia 1 em "Agora" |
+| 2026-11-17 | Fatia 1, T01: testes de mutação com Stryker.NET (núcleo 80,95%, Classic 82%), job `mutation` na CI; PR #5 aberto como rascunho. T02: protótipo com SDL3 GPU; o dono abriu a janela e aprovou o ADR 0012 e o DXC |
