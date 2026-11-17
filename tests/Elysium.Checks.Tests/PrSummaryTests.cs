@@ -9,6 +9,7 @@ public sealed class PrSummaryTests
     [InlineData("tests/.editorconfig", true)]
     [InlineData("tests/Directory.Build.props", true)]
     [InlineData("tools/Elysium.Checks/DocsCheck.cs", true)]
+    [InlineData("tests/hooks/guard-bash.tests.ps1", true)]
     [InlineData("src/core/Elysium.Core/CoreAssembly.cs", false)]
     [InlineData("docs/ARCHITECTURE.md", false)]
     public void Protected_paths_are_recognized(string path, bool expected)

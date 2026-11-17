@@ -15,5 +15,6 @@
 /src/BannedSymbols.txt              @ecologycrw
 /tools/Elysium.Checks/              @ecologycrw
 /tests/Elysium.Architecture.Tests/  @ecologycrw
+/tests/hooks/                       @ecologycrw
 /docs/VISION.md                     @ecologycrw
 /docs/ROADMAP.md                    @ecologycrw

@@ -13,7 +13,7 @@ internal static class PrSummary
 {
     private static readonly string[] ProtectedPrefixes =
     [
-        ".claude/", ".githooks/", ".github/", "tools/Elysium.Checks/", "tests/Elysium.Architecture.Tests/",
+        ".claude/", ".githooks/", ".github/", "tools/Elysium.Checks/", "tests/Elysium.Architecture.Tests/", "tests/hooks/",
     ];
 
     private static readonly string[] ProtectedFiles =

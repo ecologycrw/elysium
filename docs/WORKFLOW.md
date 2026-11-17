@@ -19,8 +19,8 @@ flowchart LR
     I --> V["verificar"]
     V --> RV["revisar"]
     RV --> F["fechar<br/>report + PR"]
-    F -->|dono testa e aprova| RT["retrospectiva"]
-    RT -->|dono escolhe| R
+    F -->|dono testa| RT["retrospectiva<br/>no mesmo PR"]
+    RT -->|dono aprova e faz o merge| R
 ```
 
 1. **`/planejar`** escolhe a próxima fatia e escreve `spec.md` e `plan.md`. O dono aprova a spec.
@@ -28,8 +28,9 @@ flowchart LR
 3. **`/verificar`** roda formatação, build, testes e checagens, e mostra a saída real.
 4. **`/revisar`** chama o revisor e corrige os achados graves.
 5. **`/fechar`** escreve o `report.md`, atualiza a documentação viva e abre o PR.
-6. O dono testa, aprova e faz o merge.
-7. **`/retrospectiva`** processa as propostas e sugere de 1 a 3 próximas fatias, com uma recomendação.
+6. O dono testa e conta o que achou.
+7. **`/retrospectiva`** registra o feedback, processa as propostas e sugere de 1 a 3 próximas fatias, com uma recomendação. Ela roda **no mesmo PR**, porque a `main` só muda por PR aprovado: assim o dono aprova uma vez só, já com a retrospectiva incluída.
+8. O dono aprova o PR e faz o squash merge.
 
 Outras skills: `/status` (onde estamos), `/propor` (registrar uma proposta) e `/consolidar` (a faxina periódica).
 
