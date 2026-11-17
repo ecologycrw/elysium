@@ -9,11 +9,11 @@ atualizado-em: 2026-11-17
 
 ## Agora
 
-**Fatia 1 (Dois jogadores se veem): em implementação.** T01 (testes de mutação), T02 (protótipo gráfico, ADR 0012 aceito), T03 (estado do mundo no Classic) e T04 (ligação com o servidor) concluídas. O PR #5 está aberto como rascunho, para a CI rodar o job `mutation` desde já. Ver [a spec](../specs/0001-dois-jogadores-se-veem/spec.md) e o [tasks.md](../specs/0001-dois-jogadores-se-veem/tasks.md).
+**Fatia 1 (Dois jogadores se veem): em implementação.** T01 a T06 concluídas, mais a T04b (correção da P-0004): testes de mutação, protótipo gráfico (ADR 0012 aceito), estado do mundo, ligação com o servidor, movimento suave, câmera 3/4 e clique para tile. O PR #5 está aberto como rascunho, para a CI rodar o job `mutation` desde já. Ver [a spec](../specs/0001-dois-jogadores-se-veem/spec.md) e o [tasks.md](../specs/0001-dois-jogadores-se-veem/tasks.md).
 
 ## Próxima ação
 
-`/implementar` a T05 (movimento suave em `Elysium.Classic.Client`).
+`/implementar` a T07 (cena e teste de memória por quadro). Ler antes a nota da T03 no `tasks.md`: o CA-07 pode exigir uma decisão do dono.
 
 ## Bloqueios
 
@@ -40,3 +40,4 @@ Nenhum.
 | 2026-11-17 | Fatia 1 planejada; o dono aprovou a spec, a biblioteca `ppy.SDL3-CS`, o Stryker.NET (nota mínima de 80%, bloqueando o PR), as mudanças em `Directory.Packages.props`, `Elysium.Architecture.Tests` e na CI, a mudança no piso de hardware da VISION e os destinos dos itens provisórios novos (fatia 2). ROADMAP atualizado: fatia 1 em "Agora" |
 | 2026-11-17 | Fatia 1, T01: testes de mutação com Stryker.NET (núcleo 80,95%, Classic 82%), job `mutation` na CI; PR #5 aberto como rascunho. T02: protótipo com SDL3 GPU; o dono abriu a janela e aprovou o ADR 0012 e o DXC |
 | 2026-11-17 | O dono tornou o check `mutation` obrigatório na regra da `main`. Fatia 1: T03 e T04 concluídas |
+| 2026-11-17 | Fatia 1: P-0004 corrigida (T04b, aprovada pelo dono), T05 e T06 concluídas |
