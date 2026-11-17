@@ -13,7 +13,7 @@ Legenda: `[ ]` pendente · `[~]` em andamento · `[x]` concluída · `[!]` bloqu
 - [x] T07: `Elysium.Core.Server`: testes da fila do ator e loop de ticks com `TimeProvider`; registrar `Microsoft.Extensions.Logging` em `Directory.Packages.props` (trava aprovada pelo dono em 2026-11-17). Verificação: testes em `Elysium.Core.Server.Tests`.
 - [x] T08: Gateway TCP: conexões, sessões, login, repasse ao mundo, desconexão e mensagens inválidas (CA-01, CA-02, CA-07, CA-08). Verificação: testes com TCP local e um mundo falso.
 - [x] T09: `Elysium.Core.Client`: conexão do cliente, login, envio e recebimento. Feita antes da T08, porque os testes do gateway usam esta conexão. Funciona sobre qualquer `Stream`, então o TLS entra depois sem mudar o resto. Verificação: usada pelos testes da T08 e da T11.
-- [ ] T10: `tools/Elysium.Bot`: visão do mundo, comandos `walk` e `demo`. Verificação: build e testes da T11.
+- [x] T10: `tools/Elysium.Bot`: visão do mundo, comandos `walk` e `demo`. Verificação: build e testes da T11.
 - [ ] T11: `samples/Elysium.Demo.Server` (mapa e números do jogo), inclusão em `Elysium.Architecture.Tests` (trava aprovada pelo dono em 2026-11-17) e teste de ponta a ponta com três bots (CA-10). Verificação: teste em `Elysium.Demo.Server.Tests`.
 - [ ] T12: Documentação: ARCHITECTURE, documento do módulo do servidor e do protocolo, código de referência em CONVENTIONS, TECH_DEBT. Verificação: `Elysium.Checks -- all`.
 

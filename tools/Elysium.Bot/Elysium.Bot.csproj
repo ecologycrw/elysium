@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/core/Elysium.Core.Client/Elysium.Core.Client.csproj" />
+    <ProjectReference Include="../../src/framework/Elysium.Classic.Shared/Elysium.Classic.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
