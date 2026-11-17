@@ -54,6 +54,28 @@ jobs:
       - name: Render every diagram
         run: node .github/scripts/check-mermaid.mjs
 
+  # Mutation tests (P-0003, approved by the owner on 2026-11-17): fails when a server project scores under 80%.
+  # The threshold lives in each stryker-config.json. If it fails, see docs/setup/DEV.md, "Se o job mutation falhar".
+  mutation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Restore tools
+        run: dotnet tool restore
+      - name: Elysium.Core.Server
+        working-directory: tests/Elysium.Core.Server.Tests
+        run: dotnet stryker --output StrykerOutput
+      - name: Elysium.Classic.Server
+        if: success() || failure()
+        working-directory: tests/Elysium.Classic.Server.Tests
+        run: dotnet stryker --output StrykerOutput
+      - name: Scores in the job summary
+        if: success() || failure()
+        run: cat tests/*/StrykerOutput/reports/mutation-report.md >> "$GITHUB_STEP_SUMMARY"
+
   pr-summary:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest

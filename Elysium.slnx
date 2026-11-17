@@ -1,24 +1,31 @@
 <Solution>
   <Folder Name="/samples/">
+    <Project Path="samples/Elysium.Demo.Client/Elysium.Demo.Client.csproj" />
     <Project Path="samples/Elysium.Demo.Server/Elysium.Demo.Server.csproj" />
+    <Project Path="samples/Elysium.Demo.Shared/Elysium.Demo.Shared.csproj" />
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/core/">
+    <Project Path="src/core/Elysium.Core.Client.Sdl/Elysium.Core.Client.Sdl.csproj" />
     <Project Path="src/core/Elysium.Core.Client/Elysium.Core.Client.csproj" />
     <Project Path="src/core/Elysium.Core.Server/Elysium.Core.Server.csproj" />
     <Project Path="src/core/Elysium.Core/Elysium.Core.csproj" />
   </Folder>
   <Folder Name="/src/framework/">
+    <Project Path="src/framework/Elysium.Classic.Client/Elysium.Classic.Client.csproj" />
     <Project Path="src/framework/Elysium.Classic.Server/Elysium.Classic.Server.csproj" />
     <Project Path="src/framework/Elysium.Classic.Shared/Elysium.Classic.Shared.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Elysium.Architecture.Tests/Elysium.Architecture.Tests.csproj" />
     <Project Path="tests/Elysium.Checks.Tests/Elysium.Checks.Tests.csproj" />
+    <Project Path="tests/Elysium.Classic.Client.Tests/Elysium.Classic.Client.Tests.csproj" />
     <Project Path="tests/Elysium.Classic.Server.Tests/Elysium.Classic.Server.Tests.csproj" />
     <Project Path="tests/Elysium.Classic.Shared.Tests/Elysium.Classic.Shared.Tests.csproj" />
+    <Project Path="tests/Elysium.Core.Client.Tests/Elysium.Core.Client.Tests.csproj" />
     <Project Path="tests/Elysium.Core.Server.Tests/Elysium.Core.Server.Tests.csproj" />
     <Project Path="tests/Elysium.Core.Tests/Elysium.Core.Tests.csproj" />
+    <Project Path="tests/Elysium.Demo.Client.Tests/Elysium.Demo.Client.Tests.csproj" />
     <Project Path="tests/Elysium.Demo.Server.Tests/Elysium.Demo.Server.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">

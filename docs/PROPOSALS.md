@@ -47,3 +47,19 @@ Formato de cada entrada (o modelo completo fica em `templates/proposal.md`):
 - Prioridade sugerida: média
 - Status: aceita
 - Destino: fatia 1, como tarefa de trava. O dono aprova a ferramenta e a nota mínima junto com a spec da fatia 1.
+
+### P-0004: os testes de arquitetura quebram com uma dependência sem namespace
+- Origem: fatia 1, T04
+- Tipo: trava, bug
+- Evidência: o `ServerLink` usava `Task.WhenAll(a, b)`. No .NET 10, essa chamada usa a versão com `params ReadOnlySpan<Task>`, e o compilador gera ajudantes internos (`InlineArrayElementRef` e `InlineArrayAsReadOnlySpan`, em `<PrivateImplementationDetails>`) cujos tipos genéricos não têm namespace. O `EngineModel.ForbiddenDependencies` lê `dependency.Target.Namespace.FullName` sem conferir se o namespace existe (`tests/Elysium.Architecture.Tests/EngineModel.cs`, linha 47), e dois testes de camadas falham com `NullReferenceException`, sem dizer o motivo. Foi contornado no `ServerLink` com duas esperas simples, mas qualquer código novo com a mesma construção quebra o teste de novo, e o erro não ajuda a achar a causa. Sugestão: tratar um alvo sem namespace como fora das camadas do Elysium (ele nunca é uma dependência proibida) e criar um teste que prove isso.
+- Prioridade sugerida: média
+- Status: aceita
+- Destino: trava. Aprovada pelo dono em 2026-11-17 para ser corrigida na própria fatia 1, como a tarefa T04b, antes da T05. Decisão do dono: o teste de arquitetura ignora dependências sem namespace, porque elas nunca são tipos do Elysium; se a leitura de um tipo falhar por outro motivo, o erro diz qual tipo causou a falha; um teste prova as duas coisas (`EngineModelTests`, com o código de exemplo `Fixtures/InlineArrayFixture.cs`). O `ServerLink` voltou para o `Task.WhenAll`, que é mais claro.
+
+### P-0005: as regras de camada não olham o código de nível superior dos programas
+- Origem: fatia 1, T08 (ao provar a regra "só o `Elysium.Core.Client.Sdl` usa o SDL")
+- Tipo: trava
+- Evidência: o `EngineModel.ForbiddenDependencies` identificava cada tipo pelo namespace, e o código de nível superior de um `Program.cs` (como o de `samples/Elysium.Demo.Client` e o de `samples/Elysium.Demo.Server`) não tem namespace. Na T08, uma chamada ao SDL colocada direto no `Program.cs` do cliente não foi pega pela regra por tipo; a mesma chamada numa classe com namespace foi. As regras de camada (`LayerTests`) tinham a mesma lacuna: o `Program.cs` do cliente poderia usar código de servidor sem nenhum teste falhar.
+- Prioridade sugerida: média
+- Status: aceita
+- Destino: trava. Aprovada pelo dono em 2026-11-17 para ser corrigida na própria fatia 1, como a tarefa T08b, antes da T09. Decisão do dono: as regras de camada identificam cada tipo pelo assembly de onde ele vem, para que o código de nível superior dos `Program.cs` também seja conferido, e um teste prova que uma dependência proibida no `Program.cs` é pega. Na implementação apareceu um segundo motivo: o ArchUnitNET descarta o método que o compilador gera para o código de nível superior (`<Main>$`), então nem identificando pelo assembly ele vê esse código. Por isso o `EngineModel` confere, além das dependências de cada tipo (pelo assembly), as referências de cada assembly a outros assemblies, que o compilador só grava quando o código usa algo do outro projeto. Provado em `EngineModelTests` (um tipo sem namespace, em `Fixtures/GlobalNamespaceFixture.cs`, e o `Program.cs` real do cliente) e conferido à mão: uma chamada ao SDL no `Program.cs` do cliente faz a regra falhar.

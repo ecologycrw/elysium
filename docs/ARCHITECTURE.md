@@ -33,9 +33,9 @@ As dependências só descem (INV-02). Cada camada é um conjunto de projetos .NE
 
 | Pasta | Projetos | Camada |
 |---|---|---|
-| `src/core/` | `Elysium.Core`, `Elysium.Core.Server`, `Elysium.Core.Client` | Núcleo |
-| `src/framework/` | `Elysium.Classic.Shared`, `Elysium.Classic.Server` (e `Elysium.Classic.Client` a partir da fatia 1) | Classic |
-| `samples/` | `Elysium.Demo.Server` (o servidor do jogo de demonstração) | Jogo |
+| `src/core/` | `Elysium.Core`, `Elysium.Core.Server`, `Elysium.Core.Client`, `Elysium.Core.Client.Sdl` (a camada de plataforma do cliente) | Núcleo |
+| `src/framework/` | `Elysium.Classic.Shared`, `Elysium.Classic.Server`, `Elysium.Classic.Client` | Classic |
+| `samples/` | `Elysium.Demo.Shared` (o mapa e a velocidade, que servidor e cliente compartilham), `Elysium.Demo.Server` e `Elysium.Demo.Client` (os programas do jogo de demonstração) | Jogo |
 | `tools/` | `Elysium.Checks`, `Elysium.Bot` (o bot headless) | Ferramentas |
 | `tests/` | `<Projeto>.Tests`, `Elysium.Architecture.Tests` | Testes |
 
@@ -44,6 +44,8 @@ Regras de dependência:
 - O núcleo não referencia o Classic; o Classic não referencia projetos de jogo.
 - `*.Shared` não referencia `*.Server` nem `*.Client`.
 - `*.Server` e `*.Client` não se referenciam.
+- Só `Elysium.Core.Client.Sdl` usa o SDL (INV-12).
+- Os testes de arquitetura identificam cada tipo pelo projeto de onde ele vem e conferem também as referências entre projetos, para que o código de um `Program.cs` não escape das regras (P-0005).
 - Um projeto novo só nasce quando existe um motivo real (ver a regra de três em [CONVENTIONS.md](CONVENTIONS.md#regra-de-três)).
 
 ## Servidor
@@ -135,10 +137,13 @@ O PostgreSQL é a fonte da verdade a partir da fatia 2. Antes disso, uma impleme
 
 ## Cliente
 
-- **Cliente = núcleo do cliente + gráficos + entrada + UI.** O núcleo do cliente (conexão, login, protocolo, entidades visíveis, estado do jogador) é o mesmo que o bot usa.
-- **Camada de plataforma:** janela, entrada, arquivos, áudio e API gráfica ficam atrás de uma camada própria. Windows primeiro, sem nada que feche as portas de Linux e mobile (INV-12). Os testes rodam em Windows e em Linux.
-- **Renderização:** forward+ (clustered forward), adequado a muita transparência aditiva e a muitas luzes pequenas. Skinning na GPU com instancing por peça, partículas na GPU, qualidade reduzida para personagens e efeitos distantes, e um orçamento de personagens visíveis com prioridade. A biblioteca gráfica (a candidata é o SDL3 GPU) é escolhida na fatia 1, com protótipo e ADR.
-- **Desempenho:** o loop do frame não aloca memória, e isso é medido em teste. A cena de referência do cerco precisa rodar no PC mínimo.
+Como é agora: ver [o documento do cliente](modules/cliente.md).
+
+- **Cliente = núcleo do cliente + gráficos + entrada + UI.** A ligação com o servidor fica no núcleo (`Elysium.Core.Client`); o estado do mundo, o movimento, a câmera e a montagem da cena ficam no Classic (`Elysium.Classic.Client`). O bot usa o mesmo estado do mundo, e os testes de ponta a ponta rodam os mesmos quadros do cliente, sem janela.
+- **Quadro:** a rede trabalha em segundo plano e só coloca mensagens numa fila. O quadro nunca espera pela rede: tira o que chegou, atualiza o mundo, move os personagens e preenche a cena, tudo numa thread só.
+- **Camada de plataforma:** janela, entrada, arquivos, áudio e API gráfica ficam atrás de uma camada própria, hoje `Elysium.Core.Client.Sdl`, com o SDL3 ([ADR 0012](adr/0012-sdl3-plataforma-e-graficos.md)). O resto do cliente fala com ela só por dados: a entrada do quadro (`FrameInput`) e a descrição da cena (`Scene`). Windows primeiro, sem nada que feche as portas de Linux e mobile (INV-12). Os testes rodam em Windows e em Linux.
+- **Renderização:** hoje, blocos coloridos desenhados de uma vez (instancing) com uma luz direcional. O destino é o forward+ (clustered forward), adequado a muita transparência aditiva e a muitas luzes pequenas: skinning na GPU com instancing por peça, partículas na GPU, qualidade reduzida para personagens e efeitos distantes, e um orçamento de personagens visíveis com prioridade. Tudo isso cresce dentro da camada de plataforma; o jogo continua só montando a cena.
+- **Desempenho:** o loop do frame não aloca memória, e isso é medido em teste (desde a fatia 1, em `FrameAllocationTests`). A cena de referência do cerco precisa rodar no PC mínimo.
 - **UI:** retained-mode, com data binding e skins.
 - **Patcher (mais à frente):** pacotes de conteúdo identificados por hash e patches que baixam só a diferença.
 
@@ -159,7 +164,7 @@ Regras que nenhuma mudança pode violar. Sempre que possível, cada uma é garan
 | INV-09 | O snapshot de um mapa grava todos os personagens no mesmo tick, numa única transação | testes |
 | INV-10 | Núcleo e Classic não contêm nomes, números ou regras de um jogo específico | revisão e testes de arquitetura |
 | INV-11 | O protocolo tem versão explícita; uma mudança incompatível muda a versão | testes de protocolo |
-| INV-12 | Núcleo e Classic não falam diretamente com o sistema operacional; tudo passa pela camada de plataforma | testes em Linux e revisão |
+| INV-12 | Núcleo e Classic não falam diretamente com o sistema operacional; tudo passa pela camada de plataforma | teste de arquitetura (só `Elysium.Core.Client.Sdl` usa o SDL), testes em Linux e revisão |
 | INV-13 | O código é compatível com NativeAOT: sem reflexão dinâmica nem geração de código em tempo de execução | analisadores de AOT |
 | INV-14 | O cliente só recebe os dados de que precisa | revisão |
 | INV-15 | Nenhum segredo entra no repositório | hook de pre-commit e detecção do GitHub |

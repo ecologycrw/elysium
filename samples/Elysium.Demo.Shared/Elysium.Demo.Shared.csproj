@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- What the demo server and the demo client must agree on: the map and the speed of a step. -->
+  <ItemGroup>
+    <ProjectReference Include="../../src/framework/Elysium.Classic.Shared/Elysium.Classic.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data/demo.map" LogicalName="Elysium.Demo.Shared.Data.demo.map" />
+  </ItemGroup>
+
+</Project>

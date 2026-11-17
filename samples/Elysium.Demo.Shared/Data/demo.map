@@ -1,4 +1,4 @@
-# Elysium Demo: the test field (slice 0).
+# Elysium Demo: the test field (slice 0). The server and the client read this same file.
 # spawn <column> <row>: players enter at these tiles in turn.
 # Spawns 0 and 1 are close together; spawn 2 is far from both.
 spawn 10 10

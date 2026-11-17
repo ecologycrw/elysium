@@ -18,9 +18,11 @@ Termos usados no projeto, em português simples.
 | **Determinístico** | Com as mesmas entradas, o resultado é sempre o mesmo. Permite repetir exatamente um teste |
 | **Dupe** | Duplicação ilegal de item, normalmente explorando uma queda do servidor ou uma troca mal feita |
 | **Fatia** | Uma etapa pequena e completa do desenvolvimento, que entrega algo que dá para ver funcionando |
+| **FPS** | Quadros por segundo: quantas vezes por segundo a janela é redesenhada. 60 é fluido; abaixo de 30, dá para ver os saltos |
 | **Hook** | Um script que roda automaticamente antes ou depois de uma ação (um commit, um comando da IA) e pode bloqueá-la |
 | **Hot reload** | Recarregar dados ou código com o programa rodando, sem reiniciar |
 | **Instância** | Uma cópia temporária de um mapa, criada para um evento e destruída no fim |
+| **Instancing** | Desenhar a mesma forma muitas vezes, em lugares, tamanhos e cores diferentes, com um pedido só à placa de vídeo. Muito mais rápido que um pedido por objeto |
 | **Invariante** | Uma regra que nenhuma mudança pode violar (`INV-01`…, em [ARCHITECTURE.md](ARCHITECTURE.md#invariantes)) |
 | **Lease de posse** | Um "crachá" que diz qual ator controla um personagem naquele momento. Só um ator tem o crachá por vez |
 | **Ledger** | O livro-razão dos itens: o registro de toda criação, transferência e destruição. Só recebe novos registros; nada é apagado |
@@ -31,7 +33,11 @@ Termos usados no projeto, em português simples.
 | **PR** | *Pull Request*: o pedido para juntar uma branch na `main`. É onde o dono revisa e aprova |
 | **Protocolo** | As mensagens que cliente e servidor trocam, e o formato delas |
 | **Push** | Enviar os commits para o GitHub |
+| **Quadro** | Uma imagem da janela. A cada quadro o cliente lê o que chegou do servidor, move os personagens e desenha a cena |
+| **SDL** | A biblioteca que cuida da janela, do mouse e da placa de vídeo no cliente ([ADR 0012](adr/0012-sdl3-plataforma-e-graficos.md)). Só um projeto da engine fala com ela |
+| **Shader** | Um programa pequeno que roda na placa de vídeo e decide onde e com que cor cada ponto aparece |
 | **Snapshot** | Uma foto do estado do jogo gravada no banco de tempos em tempos |
 | **Spec** | A especificação de uma fatia: o que ela entrega e como saber que está pronta |
+| **Teste de mutação** | Uma ferramenta muda pedacinhos do código de propósito e confere se algum teste falha. A nota é a porcentagem de mudanças que os testes pegaram |
 | **Tick** | Um "passo" da simulação do servidor. O servidor roda de 10 a 20 ticks por segundo |
 | **Trava** | Qualquer proteção automática: hook, permissão, teste de arquitetura, CI, regra do GitHub |

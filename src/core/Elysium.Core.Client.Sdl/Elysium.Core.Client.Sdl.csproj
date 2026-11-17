@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The platform layer of the client (INV-12): the only project that talks to SDL3, and through it to the
+       operating system and the GPU. Approved by the owner on 2026-11-17 (slice 1); see docs/adr/0012. -->
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ppy.SDL3-CS" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Elysium.Core.Client/Elysium.Core.Client.csproj" />
+  </ItemGroup>
+
+  <!-- Shaders compiled ahead of time by Shaders/compile.sh (SPIR-V for Vulkan, DXIL for Direct3D 12). -->
+  <ItemGroup>
+    <EmbeddedResource Include="Shaders/Compiled/*" LogicalName="Shaders.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

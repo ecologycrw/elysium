@@ -87,6 +87,11 @@ A IA imita o código que já existe. Por isso, os melhores exemplos de cada padr
 | testar algo que depende de tempo real | `tests/Elysium.Core.Server.Tests/Actors/TickRunnerTests.cs`, com o `ManualTimeProvider` |
 | testar algo pela rede de verdade | `tests/Elysium.Core.Server.Tests/Sessions/GatewayTests.cs` |
 | escrever mensagens de log | `src/core/Elysium.Core.Server/Sessions/Gateway.cs` (`[LoggerMessage]`) |
+| falar com o servidor sem travar o quadro do cliente | `src/core/Elysium.Core.Client/Connection/ServerLink.cs` |
+| mostrar no cliente uma mensagem nova do servidor | `src/framework/Elysium.Classic.Client/World/WorldState.cs` (devolver um `WorldChange`) e `Presentation/ClientWorld.cs` (repassar a quem mostra) |
+| desenhar algo novo na cena | `src/framework/Elysium.Classic.Client/Presentation/WorldSceneBuilder.cs`, com cores e tamanhos no `SceneStyle` do jogo |
+| provar que o quadro não cria memória nova | `tests/Elysium.Classic.Client.Tests/Presentation/FrameAllocationTests.cs` (mensagens codificadas antes de medir) |
+| testar o cliente de ponta a ponta, sem janela | `tests/Elysium.Demo.Client.Tests/EndToEndTests.cs`, com o `HeadlessClient` |
 
 ## Testes
 

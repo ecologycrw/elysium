@@ -46,7 +46,7 @@ O jogo de demonstração é uma amostra para testes, não um jogo comercial.
 - Interface pesada (inventário em grade, trade, lojas, chat, party, guild), com data binding e skins.
 - Windows primeiro, sem fechar as portas de Linux e mobile.
 
-## Piso de hardware (proposta; confirmada na fatia 1)
+## Piso de hardware (proposta; confirmada na fatia de escala)
 
 | | Mínimo | Recomendado |
 |---|---|---|

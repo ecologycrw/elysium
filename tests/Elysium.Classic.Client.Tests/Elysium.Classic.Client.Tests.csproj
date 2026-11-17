@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/framework/Elysium.Classic.Client/Elysium.Classic.Client.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,7 +1,7 @@
 ---
-fase: entre-fatias
-spec-atual:
-branch: main
+fase: fatia
+spec-atual: 0001
+branch: fatia/0001-dois-jogadores-se-veem
 atualizado-em: 2026-11-17
 ---
 
@@ -9,11 +9,11 @@ atualizado-em: 2026-11-17
 
 ## Agora
 
-**Fatia 0 (Servidor e bots) concluída:** o dono testou e aprovou, e a retrospectiva foi feita. O PR #4 aguarda a aprovação e o squash merge do dono. Nenhuma fatia em andamento.
+**Fatia 1 (Dois jogadores se veem): em implementação.** T01 a T11 concluídas, mais a T04b e a T08b (correções da P-0004 e da P-0005): testes de mutação, protótipo gráfico (ADR 0012 aceito), estado do mundo, ligação com o servidor, movimento suave, câmera 3/4, clique para tile, montagem da cena (com o teste de memória por quadro), desenho da cena na janela, o cliente de demonstração (login, loop e título), o teste de ponta a ponta com dois clientes pela rede e a documentação. O PR #5 está aberto como rascunho, para a CI rodar o job `mutation` desde já. Ver [a spec](../specs/0001-dois-jogadores-se-veem/spec.md) e o [tasks.md](../specs/0001-dois-jogadores-se-veem/tasks.md).
 
 ## Próxima ação
 
-Depois do merge: `/planejar` a fatia 1 (Dois jogadores se veem), incluindo os testes de mutação da proposta P-0003 como tarefa de trava.
+`/revisar`: a revisão independente da fatia.
 
 ## Bloqueios
 
@@ -36,3 +36,8 @@ Nenhum.
 | 2026-11-17 | Revisão independente da fatia 0: 4 achados importantes e os menores corrigidos; ADR 0011 proposto |
 | 2026-11-17 | Fatia 0 fechada: report escrito e PR #4 aberto para o teste do dono |
 | 2026-11-17 | O dono testou a fatia 0 (testes, cenário dos bots e `Ctrl+C`: tudo certo) e aprovou o ADR 0011. Retrospectiva: P-0001 e P-0002 aplicadas (skill `/planejar`, régua de qualidade, revisor e analisadores de complexidade com os limites padrão), P-0003 vai para a fatia 1, e a próxima fatia é a 1 |
+| 2026-11-17 | PR #4 mergeado: fatia 0 concluída |
+| 2026-11-17 | Fatia 1 planejada; o dono aprovou a spec, a biblioteca `ppy.SDL3-CS`, o Stryker.NET (nota mínima de 80%, bloqueando o PR), as mudanças em `Directory.Packages.props`, `Elysium.Architecture.Tests` e na CI, a mudança no piso de hardware da VISION e os destinos dos itens provisórios novos (fatia 2). ROADMAP atualizado: fatia 1 em "Agora" |
+| 2026-11-17 | Fatia 1, T01: testes de mutação com Stryker.NET (núcleo 80,95%, Classic 82%), job `mutation` na CI; PR #5 aberto como rascunho. T02: protótipo com SDL3 GPU; o dono abriu a janela e aprovou o ADR 0012 e o DXC |
+| 2026-11-17 | O dono tornou o check `mutation` obrigatório na regra da `main`. Fatia 1: T03 e T04 concluídas |
+| 2026-11-17 | Fatia 1: P-0004 corrigida (T04b, aprovada pelo dono), T05 e T06 concluídas |

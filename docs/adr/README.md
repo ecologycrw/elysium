@@ -15,3 +15,4 @@ Cada ADR registra uma decisão importante, o motivo e as alternativas. Um ADR ac
 | [0009](0009-ferramentas-de-verificacao.md) | Ferramentas de verificação | aceita |
 | [0010](0010-documentacao.md) | Documentação como memória do projeto | aceita |
 | [0011](0011-versao-do-protocolo-no-login.md) | Versão do protocolo na mensagem de login, não em cada envelope | aceita |
+| [0012](0012-sdl3-plataforma-e-graficos.md) | SDL3 para janela, entrada e GPU, com shaders HLSL compilados pelo DXC | aceita |

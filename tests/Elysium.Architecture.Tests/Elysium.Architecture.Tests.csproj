@@ -10,9 +10,13 @@
     <ProjectReference Include="../../src/core/Elysium.Core/Elysium.Core.csproj" />
     <ProjectReference Include="../../src/core/Elysium.Core.Server/Elysium.Core.Server.csproj" />
     <ProjectReference Include="../../src/core/Elysium.Core.Client/Elysium.Core.Client.csproj" />
+    <ProjectReference Include="../../src/core/Elysium.Core.Client.Sdl/Elysium.Core.Client.Sdl.csproj" />
     <ProjectReference Include="../../src/framework/Elysium.Classic.Shared/Elysium.Classic.Shared.csproj" />
+    <ProjectReference Include="../../src/framework/Elysium.Classic.Client/Elysium.Classic.Client.csproj" />
     <ProjectReference Include="../../src/framework/Elysium.Classic.Server/Elysium.Classic.Server.csproj" />
     <ProjectReference Include="../../samples/Elysium.Demo.Server/Elysium.Demo.Server.csproj" />
+    <ProjectReference Include="../../samples/Elysium.Demo.Client/Elysium.Demo.Client.csproj" />
+    <ProjectReference Include="../../samples/Elysium.Demo.Shared/Elysium.Demo.Shared.csproj" />
   </ItemGroup>
 
 </Project>
