@@ -75,6 +75,14 @@ dotnet_naming_rule.static_readonly_pascal.severity = error
 
 dotnet_diagnostic.IDE1006.severity = error
 
+# Code metrics (proposal P-0002, approved by the owner on 2026-11-17): the .NET default limits.
+# A method or type over a limit is fixed in the code; a limit is only relaxed with a real reason the owner approved.
+# CA1502: cyclomatic complexity of a method over 25. CA1505: maintainability index under 10.
+# CA1506: a type coupled to more than 95 types, or a member to more than 40.
+dotnet_diagnostic.CA1502.severity = error
+dotnet_diagnostic.CA1505.severity = error
+dotnet_diagnostic.CA1506.severity = error
+
 # Disabled rules (each one with the reason)
 # CA1716: flags names that are keywords in Visual Basic (for example "Shared").
 #         The engine is C#-only, so VB interoperability is not a goal.

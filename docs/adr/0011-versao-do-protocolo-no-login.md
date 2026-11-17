@@ -1,7 +1,7 @@
 ---
 id: 0011
 titulo: Versão do protocolo na mensagem de login, não em cada envelope
-status: proposta
+status: aceita
 data: 2026-11-17
 substitui:
 substituida-por:

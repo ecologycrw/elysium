@@ -1,7 +1,7 @@
 ---
-fase: fatia
-spec-atual: 0000
-branch: fatia/0000-servidor-e-bots
+fase: entre-fatias
+spec-atual:
+branch: main
 atualizado-em: 2026-11-17
 ---
 
@@ -9,15 +9,15 @@ atualizado-em: 2026-11-17
 
 ## Agora
 
-**Fatia 0 (Servidor e bots): fechada, aguardando o teste do dono.** PR aberto. O que testar está no [report](../specs/0000-servidor-e-bots/report.md#o-que-você-deve-testar).
+**Fatia 0 (Servidor e bots) concluída:** o dono testou e aprovou, e a retrospectiva foi feita. O PR #4 aguarda a aprovação e o squash merge do dono. Nenhuma fatia em andamento.
 
 ## Próxima ação
 
-O dono testa e conta o que achou. Depois, `/retrospectiva` no mesmo PR, antes da aprovação e do merge.
+Depois do merge: `/planejar` a fatia 1 (Dois jogadores se veem), incluindo os testes de mutação da proposta P-0003 como tarefa de trava.
 
 ## Bloqueios
 
-Nenhum. Decisão pendente do dono: o [ADR 0011](adr/0011-versao-do-protocolo-no-login.md) (versão do protocolo no login), com status `proposta`.
+Nenhum.
 
 ## Histórico
 
@@ -34,4 +34,5 @@ Nenhum. Decisão pendente do dono: o [ADR 0011](adr/0011-versao-do-protocolo-no-
 | 2026-11-17 | Fatia 0 planejada; o dono aprovou a spec, a biblioteca `Microsoft.Extensions.Logging`, as mudanças em `Directory.Packages.props` e em `Elysium.Architecture.Tests`, o protocolo v1 e os destinos de TLS e login (fatia 2). ROADMAP atualizado: fatia 0 em "Agora". Proposta P-0001 registrada |
 | 2026-11-17 | Fatia 0 implementada (T01 a T12); propostas P-0002 e P-0003 registradas a pedido do dono |
 | 2026-11-17 | Revisão independente da fatia 0: 4 achados importantes e os menores corrigidos; ADR 0011 proposto |
-| 2026-11-17 | Fatia 0 fechada: report escrito e PR aberto para o teste do dono |
+| 2026-11-17 | Fatia 0 fechada: report escrito e PR #4 aberto para o teste do dono |
+| 2026-11-17 | O dono testou a fatia 0 (testes, cenário dos bots e `Ctrl+C`: tudo certo) e aprovou o ADR 0011. Retrospectiva: P-0001 e P-0002 aplicadas (skill `/planejar`, régua de qualidade, revisor e analisadores de complexidade com os limites padrão), P-0003 vai para a fatia 1, e a próxima fatia é a 1 |

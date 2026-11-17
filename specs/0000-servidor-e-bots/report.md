@@ -17,8 +17,8 @@ O servidor do jogo existe e funciona: ele roda 20 vezes por segundo, aceita cone
 | CA-07 | testes `A_player_who_leaves_disappears_for_everyone_who_saw_it` e `Leaving_twice_or_leaving_without_joining_does_nothing` (`MapVisibilityTests`), `A_player_who_leaves_through_the_mailbox_disappears_for_the_others` (`MapActorTests`) e `A_client_that_disconnects_leaves_the_world` (`GatewayTests`) | passou |
 | CA-08 | testes `A_message_before_the_login_closes_the_connection`, `A_truncated_login_closes_the_connection`, `A_frame_over_the_size_limit_closes_only_that_connection`, `A_client_that_stops_reading_is_disconnected_instead_of_filling_the_server_memory` e `The_world_can_disconnect_a_player` (`GatewayTests`); `A_malformed_message_disconnects_only_that_player`, `A_message_type_the_map_does_not_accept_disconnects_the_player` e `A_player_who_floods_the_mailbox_is_disconnected_and_the_others_keep_playing` (`MapActorTests`) | passou |
 | CA-09 | testes `The_same_commands_produce_exactly_the_same_messages_in_two_runs` e `The_same_commands_produce_the_recorded_messages_in_any_process` (`MapActorTests`; o segundo compara com um hash gravado, conferido igual em três processos) | passou |
-| CA-10 | testes `Three_bots_run_the_slice_0_scenario_against_the_demo_server` e `The_scenario_passes_again_on_the_same_server_after_the_bots_leave` (`EndToEndTests`), pela rede de verdade; a CI roda em Windows e Linux | passou localmente; a prova no Linux é o check da CI no PR |
-| CA-11 | verificação manual: a IA rodou nesta sessão o servidor de demonstração e `demo` com os comandos de "Como o dono testa" e viu a saída esperada, terminando em `PASSED`. Falta a confirmação do dono | aguarda o dono |
+| CA-10 | testes `Three_bots_run_the_slice_0_scenario_against_the_demo_server` e `The_scenario_passes_again_on_the_same_server_after_the_bots_leave` (`EndToEndTests`), pela rede de verdade; a CI roda em Windows e Linux | passou: localmente e na CI do PR #4 (4 checks verdes, Windows e Linux) |
+| CA-11 | verificação manual do dono, em 2026-11-17: grupo 1 com `falhou: 0`; grupo 2 terminou em `PASSED`; o `Ctrl+C` encerrou o servidor com `Tick loop stopped` | confirmado |
 
 ## O que você deve testar
 
@@ -71,7 +71,7 @@ Depois, conte o que achou. Se algo não sair como descrito, copie o texto do ter
 
 ## Desvios do plano
 
-- **Versão do protocolo (precisa da sua aprovação).** O plano dizia "envelope com tamanho, tipo e versão". A versão ficou só no primeiro campo da mensagem de login, e o envelope e o começo do login nunca mudam entre versões. A decisão está no [ADR 0011](../../docs/adr/0011-versao-do-protocolo-no-login.md), com status `proposta`. Se você aprovar, ele passa a `aceita` na retrospectiva.
+- **Versão do protocolo.** O plano dizia "envelope com tamanho, tipo e versão". A versão ficou só no primeiro campo da mensagem de login, e o envelope e o começo do login nunca mudam entre versões. A decisão está no [ADR 0011](../../docs/adr/0011-versao-do-protocolo-no-login.md), aprovado pelo dono em 2026-11-17, depois do teste.
 - **Sem interface de "relógio da simulação".** A simulação só conta ticks, e o loop de ticks usa o `TimeProvider` do .NET. Isso cumpre o INV-04 sem nenhuma exceção de API proibida.
 - **Sem RNG injetado.** A spec diz "relógio e RNG injetados", mas nada nesta fatia sorteia. O RNG nasce com o primeiro sorteio (drops, na fatia 2).
 - **Sem ID de mapa no gateway.** Com um mapa só, o mundo é o próprio ator do mapa. O ID entra com o segundo mapa.
@@ -84,7 +84,7 @@ Revisão independente pelo subagente `revisor`, com o pedido do dono de revisar 
 
 - **I1:** um cliente podia congelar o mapa com pedidos válidos. Corrigido com limites no ator.
 - **I2:** um cliente que não lia fazia a memória crescer e travava o desligamento. Corrigido com a fila de saída limitada e a escrita interrompível.
-- **I3:** desvios do protocolo e do plano. Registrados acima e no ADR 0011, para a sua decisão.
+- **I3:** desvios do protocolo e do plano. Registrados acima e no ADR 0011, que o dono aprovou.
 - **I4:** faltavam testes de bytes fixos do protocolo. Criados.
 - **Menores:** quase todos corrigidos. M1 virou o TD-0008.
 - **Estilo:** a visibilidade saiu da `MapSimulation` para a `AreaOfInterest`, e os métodos longos foram divididos. A parte do E4 que sobrou (mudanças tipadas no `WorldView`) ficou para a fatia 1, no TD-0004.
@@ -95,6 +95,9 @@ Revisão independente pelo subagente `revisor`, com o pedido do dono de revisar 
 |---|---|---|
 | `Directory.Packages.props` | versões de `Microsoft.Extensions.Logging.Abstractions` e `.Console` (10.0.6) | aprovada pelo dono com a spec, em 2026-11-17 |
 | `tests/Elysium.Architecture.Tests/Elysium.Architecture.Tests.csproj` | referência a `Elysium.Demo.Server`, para as regras de camadas valerem também para ele | aprovada pelo dono com a spec, em 2026-11-17 |
+| `.editorconfig` | CA1502, CA1505 e CA1506 ligados, com os limites padrão do .NET (proposta P-0002) | aprovada pelo dono na retrospectiva, em 2026-11-17 |
+| `.claude/agents/revisor.md` | item "Régua de qualidade" na lista obrigatória e desvios do plano sem aprovação no item de escopo (P-0002) | aprovada pelo dono na retrospectiva, em 2026-11-17 |
+| `.claude/skills/planejar/SKILL.md` | a aprovação da spec move a fatia para "Agora" no ROADMAP (proposta P-0001) | aprovada pelo dono na retrospectiva, em 2026-11-17 |
 
 ## Testes removidos
 
@@ -134,3 +137,15 @@ Primeira ocorrência de cada um (a escada do `docs/WORKFLOW.md`):
 - [P-0001](../../docs/PROPOSALS.md): o `/planejar` move a fatia escolhida para "Agora" no ROADMAP.
 - [P-0002](../../docs/PROPOSALS.md): régua de qualidade sênior.
 - [P-0003](../../docs/PROPOSALS.md): testes de mutação com Stryker.NET.
+
+## Retrospectiva
+
+Feita em 2026-11-17, depois do teste do dono.
+
+- **Teste do dono:** testes automáticos com `falhou: 0`, cenário dos bots com `PASSED` e `Ctrl+C` encerrando com `Tick loop stopped`. Nenhum problema relatado.
+- **ADR 0011:** aprovado pelo dono e passado para `aceita`.
+- **Escada de erros:** esta é a primeira fatia, então todos os erros acima são a primeira ocorrência e nenhum vira regra ainda. Na próxima retrospectiva, um erro que se repetir vira proposta de regra (ou de trava, se puder ser verificado por máquina).
+- **P-0001:** aceita e aplicada. A skill `/planejar` move a fatia para "Agora" quando o dono aprova a spec.
+- **P-0002:** aceita e aplicada. A seção "Régua de qualidade" entrou no `CONVENTIONS.md` e na lista do revisor, e os analisadores CA1502, CA1505 e CA1506 estão ligados com os limites padrão. Uma medição com limites bem mais apertados mostrou que nenhum método do código da fatia 0 passa de complexidade 8 (o limite é 25), então nada precisou ser afrouxado nem refeito.
+- **P-0003:** aceita, com destino na fatia 1, como tarefa de trava.
+- **Próxima fatia:** a fatia 1 (Dois jogadores se veem), na ordem do ROADMAP.

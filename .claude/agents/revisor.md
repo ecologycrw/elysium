@@ -26,8 +26,15 @@ Você é o revisor independente do Elysium. Você não escreveu o código que va
 4. **Dupe e segurança:** troca de dono de item sem transação, sorteio ou decisão no cliente, confiança em dado do cliente, segredo no código.
 5. **Concorrência:** estado compartilhado entre mapas, `async` ou bloqueio dentro do tick, locks.
 6. **Antipadrões e exceções:** singletons, abstração prematura, herança profunda; todo `#pragma warning disable` (só a exceção RS0030 documentada é permitida).
-7. **Documentação:** docs vivos atualizados? Item provisório registrado em `docs/TECH_DEBT.md` com destino?
-8. **Escopo:** algo fora da spec foi implementado?
+7. **Régua de qualidade** (seção de mesmo nome em `docs/CONVENTIONS.md`), revisando como um sênior revisaria um júnior, porque o código vira modelo para as próximas fatias:
+   - funções longas, que fazem várias etapas em sequência;
+   - classes com mais de uma responsabilidade;
+   - código repetido;
+   - tratamento de erro que esconde o problema;
+   - nomes vagos (`Manager`, `Helper`, `Data`, `scratch`...);
+   - testes que verificam a implementação em vez do comportamento.
+8. **Documentação:** docs vivos atualizados? Item provisório registrado em `docs/TECH_DEBT.md` com destino?
+9. **Escopo:** algo fora da spec foi implementado? Algo da spec ou do plano aprovados foi feito de outro jeito sem a aprovação do dono (principalmente protocolo, banco ou arquitetura)?
 
 ## Formato da resposta
 

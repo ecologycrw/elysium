@@ -1,20 +1,21 @@
 # Roadmap
 
-> Muda só com aprovação do dono do produto. A cada retrospectiva, uma fatia passa de "Próximas" para "Agora" e é detalhada na sua spec.
+> Muda só com aprovação do dono do produto. A retrospectiva decide a próxima fatia; ela passa de "Próximas" para "Agora" quando o dono aprova a spec dela, no `/planejar`.
 
 ## Concluídas
 
 - **Preparação** (partes 1 a 4): documentos, esqueleto do código com as garantias automáticas, ambiente de IA e GitHub.
+- **Fatia 0: Servidor e bots.** Servidor por ticks com login, movimento autoritativo na grade e área de interesse; bot headless com o cenário dos três bots. Ver [o report](../specs/0000-servidor-e-bots/report.md).
 
 ## Agora
 
-**Fatia 0: Servidor e bots.** Dois bots fazem login, andam pela grade e um vê o outro; um terceiro bot, longe, não vê nenhum deles. Tudo em testes automáticos, sem gráficos. Ver [a spec](../specs/0000-servidor-e-bots/spec.md) e o [STATUS.md](STATUS.md).
+Nenhuma fatia em andamento. A próxima é a **fatia 1**, decidida na retrospectiva da fatia 0. Ver o [STATUS.md](STATUS.md).
 
 ## Próximas
 
 | Fatia | Nome | O que entrega, do ponto de vista de quem testa |
 |---|---|---|
-| 1 | Dois jogadores se veem | Janela, terreno, câmera 3/4, personagem simples e clicar para andar; dois clientes no mesmo mapa |
+| 1 | Dois jogadores se veem | Janela, terreno, câmera 3/4, personagem simples e clicar para andar; dois clientes no mesmo mapa. Inclui os testes de mutação nos projetos de servidor (proposta P-0003) |
 | 2 | Caçar | Monstros com spawn e IA simples, combate autoritativo, EXP, drops no chão, inventário em grade e persistência com ledger |
 
 ## Depois
