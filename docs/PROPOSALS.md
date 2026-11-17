@@ -15,7 +15,12 @@ Formato de cada entrada (o modelo completo fica em `templates/proposal.md`):
 
 ## Abertas
 
-*(nenhuma)*
+### P-0005: as regras de camada não olham o código de nível superior dos programas
+- Origem: fatia 1, T08 (ao provar a regra "só o `Elysium.Core.Client.Sdl` usa o SDL")
+- Tipo: trava
+- Evidência: o `EngineModel.ForbiddenDependencies` pula tipos sem namespace, e o código de nível superior de um `Program.cs` (como o de `samples/Elysium.Demo.Client` e o de `samples/Elysium.Demo.Server`) fica no namespace global. Na T08, uma chamada ao SDL colocada direto no `Program.cs` do cliente não foi pega pela regra por tipo; a mesma chamada numa classe com namespace foi. A regra do SDL ficou garantida por um segundo teste, nas referências entre assemblies, mas as regras de camada (`LayerTests`) não têm esse reforço: o `Program.cs` do cliente poderia usar código de servidor sem nenhum teste falhar. Sugestão: tratar um tipo sem namespace como parte do projeto de onde ele vem, ou conferir também as referências entre assemblies nas regras de camada.
+- Prioridade sugerida: média
+- Status: aberta
 
 ## Processadas
 
