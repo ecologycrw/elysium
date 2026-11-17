@@ -34,6 +34,13 @@ Formato de cada entrada (o modelo completo fica em `templates/proposal.md`):
 - Prioridade sugerida: alta
 - Status: aberta
 
+### P-0003: testes de mutação com Stryker.NET
+- Origem: feedback do dono, no fim da implementação da fatia 0
+- Tipo: trava
+- Evidência: nas palavras do dono, "o risco de testes que passam sem verificar nada não é pego pelo build nem pela CI". O pedido é usar testes de mutação para provar que os testes detectam erros de verdade, começando pelos projetos de servidor (`Elysium.Core.Server` e `Elysium.Classic.Server`). O [ADR 0009](adr/0009-ferramentas-de-verificacao.md) já prevê o Stryker.NET "mais adiante". Ele é uma ferramenta externa nova, e rodá-lo na CI muda uma trava (`.github/`). As duas coisas precisam da aprovação do dono. Também falta decidir a nota mínima de mutação e se ela bloqueia o PR ou só aparece no relatório.
+- Prioridade sugerida: média
+- Status: aberta
+
 ## Processadas
 
 *(nenhuma)*
