@@ -1,6 +1,7 @@
 using Elysium.Classic.Shared.Grid;
 using Elysium.Classic.Shared.Messages;
 using Elysium.Core.Client.Connection;
+using Elysium.Core.Protocol;
 
 namespace Elysium.Bot;
 
@@ -16,6 +17,7 @@ public sealed class HeadlessBot : IAsyncDisposable
     private readonly TextWriter _output;
     private readonly CancellationTokenSource _stopping = new();
     private Task _receiving = Task.CompletedTask;
+    private volatile bool _isConnected = true;
 
     private HeadlessBot(string name, GameConnection connection, TextWriter output)
     {
@@ -26,40 +28,14 @@ public sealed class HeadlessBot : IAsyncDisposable
 
     public string Name { get; }
 
-    public bool IsConnected { get; private set; } = true;
+    /// <summary>False once the server closed the connection or sent something the bot could not read.</summary>
+    public bool IsConnected => _isConnected;
 
-    public TilePosition? Position
-    {
-        get
-        {
-            lock (_gate)
-            {
-                return _view.Position;
-            }
-        }
-    }
+    public TilePosition? Position => ReadView(view => view.Position);
 
-    public int MovesRefused
-    {
-        get
-        {
-            lock (_gate)
-            {
-                return _view.MovesRefused;
-            }
-        }
-    }
+    public int MovesRefused => ReadView(view => view.MovesRefused);
 
-    public IReadOnlyCollection<string> VisibleNames
-    {
-        get
-        {
-            lock (_gate)
-            {
-                return _view.VisibleNames;
-            }
-        }
-    }
+    public IReadOnlyCollection<string> VisibleNames => ReadView(view => view.VisibleNames);
 
     /// <summary>Connects and logs in. Throws <see cref="InvalidOperationException"/> when the server refuses the login.</summary>
     public static async Task<HeadlessBot> ConnectAsync(string host, int port, string name, TextWriter output, CancellationToken cancellationToken)
@@ -78,13 +54,7 @@ public sealed class HeadlessBot : IAsyncDisposable
         return bot;
     }
 
-    public bool Sees(string name)
-    {
-        lock (_gate)
-        {
-            return _view.Sees(name);
-        }
-    }
+    public bool Sees(string name) => ReadView(view => view.Sees(name));
 
     public async Task WalkToAsync(TilePosition destination, CancellationToken cancellationToken)
     {
@@ -151,7 +121,20 @@ public sealed class HeadlessBot : IAsyncDisposable
         {
             // Stopping.
         }
+        catch (ProtocolException exception)
+        {
+            Say($"stopped: the server sent a message the bot could not read ({exception.Message})");
+        }
 
-        IsConnected = false;
+        _isConnected = false;
+    }
+
+    /// <summary>Reads the world view under the lock, because the receive loop changes it from another thread.</summary>
+    private T ReadView<T>(Func<WorldView, T> read)
+    {
+        lock (_gate)
+        {
+            return read(_view);
+        }
     }
 }

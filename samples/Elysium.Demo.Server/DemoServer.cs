@@ -13,18 +13,25 @@ namespace Elysium.Demo.Server;
 /// </summary>
 public sealed class DemoServer : IAsyncDisposable
 {
+    private readonly SessionRegistry _registry;
     private readonly TcpGatewayListener _listener;
     private readonly CancellationTokenSource _stopping;
     private readonly Task _ticking;
 
-    private DemoServer(TcpGatewayListener listener, CancellationTokenSource stopping, Task ticking)
+    private DemoServer(SessionRegistry registry, TcpGatewayListener listener, CancellationTokenSource stopping, Task ticking)
     {
+        _registry = registry;
         _listener = listener;
         _stopping = stopping;
         _ticking = ticking;
     }
 
     public int Port => _listener.LocalEndPoint.Port;
+
+    /// <summary>
+    /// Players logged in right now. When it drops, their leaving is already queued for the map, ahead of any later login.
+    /// </summary>
+    public int OnlinePlayers => _registry.Count;
 
     /// <summary>Starts the server. Port 0 asks the system for any free port.</summary>
     public static DemoServer Start(IPAddress address, int port, ILoggerFactory loggerFactory, TimeProvider timeProvider)
@@ -38,7 +45,7 @@ public sealed class DemoServer : IAsyncDisposable
         var stopping = new CancellationTokenSource();
         var ticking = runner.RunAsync(stopping.Token);
         var listener = TcpGatewayListener.Start(gateway, new IPEndPoint(address, port), loggerFactory.CreateLogger<TcpGatewayListener>());
-        return new DemoServer(listener, stopping, ticking);
+        return new DemoServer(registry, listener, stopping, ticking);
     }
 
     /// <summary>Completes when the tick loop stops, which only happens on shutdown or when a tick fails.</summary>

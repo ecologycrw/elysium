@@ -39,10 +39,11 @@ public sealed class EndToEndTests
         await using var server = DemoServer.Start(IPAddress.Loopback, port: 0, NullLoggerFactory.Instance, TimeProvider.System);
 
         var first = await DemoScenario.RunAsync("127.0.0.1", server.Port, TextWriter.Null, Token);
-        await WaitForEmptyMapAsync();
+        var emptied = await HeadlessBot.WaitUntilAsync(() => server.OnlinePlayers == 0, TimeSpan.FromSeconds(10), Token);
         var second = await DemoScenario.RunAsync("127.0.0.1", server.Port, TextWriter.Null, Token);
 
         Assert.True(first);
+        Assert.True(emptied, "The bots of the first run did not log out.");
         Assert.True(second);
     }
 
@@ -56,7 +57,4 @@ public sealed class EndToEndTests
         Assert.True(map.SpawnPoints[0].ChebyshevDistance(map.SpawnPoints[2]) > DemoGame.MapRules.ViewRadius);
         Assert.True(map.SpawnPoints[1].ChebyshevDistance(map.SpawnPoints[2]) > DemoGame.MapRules.ViewRadius);
     }
-
-    /// <summary>The bots disconnect when the scenario ends; give the map a few ticks to process their leaving.</summary>
-    private static Task WaitForEmptyMapAsync() => Task.Delay(TimeSpan.FromMilliseconds(500), Token);
 }

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net.Sockets;
 using Elysium.Bot;
 using Elysium.Classic.Shared.Grid;
 
@@ -8,14 +9,13 @@ using Elysium.Classic.Shared.Grid;
 
 const string Usage = """
     Usage:
-      demo [--host <host>] [--port <port>]                      run the three-bot scenario
+      demo [--host <host>] [--port <port>]                              run the three-bot scenario
       walk --name <name> --to <x>,<y> [--host <host>] [--port <port>]   log in and walk to a tile
     """;
 
 if (args.Length == 0 || args[0] is not ("demo" or "walk"))
 {
-    Console.WriteLine(Usage);
-    return 2;
+    return ShowUsage();
 }
 
 var options = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -25,7 +25,11 @@ for (var i = 1; i + 1 < args.Length; i += 2)
 }
 
 var host = options.GetValueOrDefault("--host", "127.0.0.1");
-var port = int.Parse(options.GetValueOrDefault("--port", "7000"), CultureInfo.InvariantCulture);
+if (!int.TryParse(options.GetValueOrDefault("--port", "7000"), NumberStyles.None, CultureInfo.InvariantCulture, out var port))
+{
+    return ShowUsage();
+}
+
 using var cancellation = new CancellationTokenSource();
 Console.CancelKeyPress += (_, eventArgs) =>
 {
@@ -40,29 +44,16 @@ try
         return await DemoScenario.RunAsync(host, port, Console.Out, cancellation.Token) ? 0 : 1;
     }
 
-    if (!options.TryGetValue("--name", out var name) || !options.TryGetValue("--to", out var to))
+    if (!options.TryGetValue("--name", out var name)
+        || !options.TryGetValue("--to", out var to)
+        || TryParseTile(to) is not { } destination)
     {
-        Console.WriteLine(Usage);
-        return 2;
+        return ShowUsage();
     }
 
-    var parts = to.Split(',');
-    var destination = new TilePosition(
-        int.Parse(parts[0], CultureInfo.InvariantCulture),
-        int.Parse(parts[1], CultureInfo.InvariantCulture));
-
-    await using var bot = await HeadlessBot.ConnectAsync(host, port, name, Console.Out, cancellation.Token);
-    await HeadlessBot.WaitUntilAsync(() => bot.Position is not null, TimeSpan.FromSeconds(10), cancellation.Token);
-    await bot.WalkToAsync(destination, cancellation.Token);
-    await HeadlessBot.WaitUntilAsync(
-        () => bot.Position == destination || bot.MovesRefused > 0 || !bot.IsConnected,
-        TimeSpan.FromSeconds(60),
-        cancellation.Token);
-    var arrived = bot.Position == destination;
-    bot.Say(arrived ? $"arrived at {destination}" : $"stopped at {bot.Position}");
-    return arrived ? 0 : 1;
+    return await WalkCommand.RunAsync(host, port, name, destination, Console.Out, cancellation.Token) ? 0 : 1;
 }
-catch (Exception exception) when (exception is InvalidOperationException or System.Net.Sockets.SocketException)
+catch (Exception exception) when (exception is InvalidOperationException or SocketException)
 {
     Console.WriteLine($"FAILED: {exception.Message}");
     return 1;
@@ -70,4 +61,20 @@ catch (Exception exception) when (exception is InvalidOperationException or Syst
 catch (OperationCanceledException)
 {
     return 1;
+}
+
+static int ShowUsage()
+{
+    Console.WriteLine(Usage);
+    return 2;
+}
+
+static TilePosition? TryParseTile(string text)
+{
+    var parts = text.Split(',');
+    return parts.Length == 2
+        && int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var x)
+        && int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out var y)
+        ? new TilePosition(x, y)
+        : null;
 }
