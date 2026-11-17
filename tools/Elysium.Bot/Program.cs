@@ -54,9 +54,13 @@ try
     await using var bot = await HeadlessBot.ConnectAsync(host, port, name, Console.Out, cancellation.Token);
     await HeadlessBot.WaitUntilAsync(() => bot.Position is not null, TimeSpan.FromSeconds(10), cancellation.Token);
     await bot.WalkToAsync(destination, cancellation.Token);
-    var arrived = await HeadlessBot.WaitUntilAsync(() => bot.Position == destination || !bot.IsConnected, TimeSpan.FromSeconds(60), cancellation.Token);
-    bot.Say(arrived && bot.Position == destination ? $"arrived at {destination}" : $"stopped at {bot.Position}");
-    return 0;
+    await HeadlessBot.WaitUntilAsync(
+        () => bot.Position == destination || bot.MovesRefused > 0 || !bot.IsConnected,
+        TimeSpan.FromSeconds(60),
+        cancellation.Token);
+    var arrived = bot.Position == destination;
+    bot.Say(arrived ? $"arrived at {destination}" : $"stopped at {bot.Position}");
+    return arrived ? 0 : 1;
 }
 catch (Exception exception) when (exception is InvalidOperationException or System.Net.Sockets.SocketException)
 {

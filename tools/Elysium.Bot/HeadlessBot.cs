@@ -39,6 +39,17 @@ public sealed class HeadlessBot : IAsyncDisposable
         }
     }
 
+    public int MovesRefused
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _view.MovesRefused;
+            }
+        }
+    }
+
     public IReadOnlyCollection<string> VisibleNames
     {
         get

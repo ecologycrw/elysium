@@ -17,6 +17,9 @@ public sealed class WorldView
 
     public TilePosition? Position { get; private set; }
 
+    /// <summary>How many move requests the server refused so far.</summary>
+    public int MovesRefused { get; private set; }
+
     public IReadOnlyCollection<string> VisibleNames => [.. _visible.Values.Select(entity => entity.Name).Order(StringComparer.Ordinal)];
 
     public bool Sees(string name) => _visible.Values.Any(entity => entity.Name == name);
@@ -54,6 +57,7 @@ public sealed class WorldView
                 return _visible.Remove(gone.Id, out var lost) ? $"lost sight of {lost.Name}" : null;
             case ClassicMessageTypes.MoveRejected:
                 var rejected = frame.Decode<MoveRejected>();
+                MovesRefused++;
                 return $"could not walk to {rejected.Destination}: {rejected.Reason}";
             default:
                 return $"received unknown message type {frame.Type}";
