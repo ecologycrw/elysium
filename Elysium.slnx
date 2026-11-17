@@ -1,9 +1,11 @@
 <Solution>
   <Folder Name="/samples/">
+    <Project Path="samples/Elysium.Demo.Client/Elysium.Demo.Client.csproj" />
     <Project Path="samples/Elysium.Demo.Server/Elysium.Demo.Server.csproj" />
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/core/">
+    <Project Path="src/core/Elysium.Core.Client.Sdl/Elysium.Core.Client.Sdl.csproj" />
     <Project Path="src/core/Elysium.Core.Client/Elysium.Core.Client.csproj" />
     <Project Path="src/core/Elysium.Core.Server/Elysium.Core.Server.csproj" />
     <Project Path="src/core/Elysium.Core/Elysium.Core.csproj" />
