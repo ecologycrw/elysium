@@ -1,0 +1,19 @@
+# The owner reviews every change (docs/adr/0008-fluxo-git.md).
+# The protected paths ("travas") are also listed one by one so they stand out:
+# changing them needs the owner's explicit approval (docs/WORKFLOW.md).
+*                                   @ecologycrw
+
+/.claude/                           @ecologycrw
+/.githooks/                         @ecologycrw
+/.github/                           @ecologycrw
+/AGENTS.md                          @ecologycrw
+/CLAUDE.md                          @ecologycrw
+/global.json                        @ecologycrw
+/Directory.Packages.props           @ecologycrw
+**/Directory.Build.props            @ecologycrw
+**/.editorconfig                    @ecologycrw
+/src/BannedSymbols.txt              @ecologycrw
+/tools/Elysium.Checks/              @ecologycrw
+/tests/Elysium.Architecture.Tests/  @ecologycrw
+/docs/VISION.md                     @ecologycrw
+/docs/ROADMAP.md                    @ecologycrw

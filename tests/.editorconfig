@@ -1,0 +1,5 @@
+# Relaxations that apply only to test code.
+
+[*.cs]
+# Test names use underscores to read as sentences: Move_rejects_step_faster_than_speed
+dotnet_diagnostic.CA1707.severity = none
