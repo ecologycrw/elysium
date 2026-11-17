@@ -22,14 +22,19 @@ Recebe conexões, faz o login, roda cada mapa como um ator por ticks e decide so
 
 - **Tick:** o `TickRunner` chama `Tick()` do ator de 10 a 20 vezes por segundo. A simulação só conhece o número do tick; ela nunca lê um relógio (INV-04).
 - **Ator do mapa:** a rede só coloca comandos na fila do `MapActor`. No tick, ele aplica os comandos na ordem de chegada e depois avança a `MapSimulation` (INV-03).
-- **Gateway:** lê as mensagens de cada conexão fora do tick. A primeira tem de ser o login; depois, tudo vai para o mundo (`IWorld`). As respostas voltam pela `SessionRegistry` (`IClientOutbox`), por ID de entidade.
+- **Limites do ator** (`MapActorLimits`): cada tick tira da fila no máximo um número fixo de comandos; de cada jogador, só vale o último pedido de movimento do tick; e quem tem mensagens demais esperando na fila é desconectado. Assim, um cliente sozinho não congela o mapa.
+- **Gateway:** lê as mensagens de cada conexão fora do tick. A primeira tem de ser o login; depois, tudo vai para o mundo (`IWorld`). As respostas voltam pela `SessionRegistry` (`IClientOutbox`), por ID de entidade. O cliente sempre recebe o `LoginAccepted` antes de qualquer mensagem do mundo.
+- **Fila de saída** (`GatewayOptions.MaxQueuedFramesPerClient`): cada cliente tem uma fila limitada. Quem não lê rápido o bastante enche a fila e é desconectado; o desligamento do servidor interrompe uma escrita parada.
+- **Transporte:** o gateway trabalha com qualquer `Stream` (`Gateway.RunConnectionAsync`). O `TcpGatewayListener` é só quem aceita conexões TCP; TLS, QUIC ou WebSocket seriam outra classe do mesmo tipo.
 - **Pontos de entrada:** o jogador entra no ponto `jogadores no mapa % quantidade de pontos`.
-- **Movimento:** o cliente pede um destino. O servidor recusa destino fora do mapa, bloqueado ou inalcançável, acha o caminho mais curto em 8 direções (sem cortar quina de parede, preferindo a linha reta) e anda um tile a cada `TicksPerStep` ticks. Pedir de novo não acelera.
-- **AOI:** o mapa é dividido em células do tamanho do raio de visão. Ver é simétrico e vale até `ViewRadius` tiles, contando a diagonal como um.
+- **Movimento** (`MapSimulation`): o cliente pede um destino. O servidor recusa destino fora do mapa, bloqueado ou inalcançável, acha o caminho mais curto em 8 direções (`GridPathfinder`: sem cortar quina de parede, preferindo a linha reta) e anda um tile a cada `TicksPerStep` ticks. Pedir de novo não acelera.
+- **AOI** (`AreaOfInterest`): o mapa é dividido em células do tamanho do raio de visão. Ver é simétrico e vale até `ViewRadius` tiles, contando a diagonal como um.
 
 ## Protocolo, versão 1
 
 Envelope, em little-endian: **2 bytes** com o tamanho do resto, **2 bytes** com o tipo da mensagem e o conteúdo. Strings: 1 byte de tamanho + UTF-8. Posições: coluna e linha em 2 bytes cada. A versão do protocolo é o primeiro campo do `LoginRequest`, e o servidor a confere antes de ler o resto.
+
+**O que nunca muda entre versões:** o envelope e o começo do `LoginRequest` (tipo 1, com a versão no primeiro campo de 2 bytes). Se mudassem, um cliente de outra versão não chegaria nem à conferência da versão e não saberia por que foi desconectado. Os bytes exatos de cada mensagem estão fixados em testes, então qualquer mudança no formato aparece como teste falhando.
 
 | Tipo | Mensagem | Sentido | Campos |
 |---|---|---|---|
@@ -77,4 +82,4 @@ O servidor de demonstração monta tudo em `samples/Elysium.Demo.Server/DemoServ
 
 ## Itens provisórios
 
-TD-0001 a TD-0006 em [TECH_DEBT.md](../TECH_DEBT.md).
+TD-0001 a TD-0008 em [TECH_DEBT.md](../TECH_DEBT.md).

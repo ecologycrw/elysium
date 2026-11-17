@@ -23,14 +23,44 @@ Legenda: `[ ]` pendente · `[~]` em andamento · `[x]` concluída · `[!]` bloqu
 
 ## Revisão
 
-Achados do revisor e o que foi feito com cada um. Preenchido pelo `/revisar`.
+Revisão independente feita pelo subagente `revisor` em 2026-11-17, a pedido do dono "como um sênior revisaria um júnior". Nenhum achado crítico. Todos os achados foram conferidos no código, e todos procediam.
+
+| Achado | Gravidade | Procede? | O que foi feito |
+|---|---|---|---|
+| I1: um cliente podia congelar o mapa mandando pedidos válidos sem parar (fila de entrada sem limite) | importante | sim | `MapActorLimits`: limite de comandos por tick, só o último pedido de movimento de cada jogador vale, e quem enche a fila é desconectado. Testes novos em `MapActorTests`. Tempo máximo de login e limite de conexões viraram o TD-0007 |
+| I2: um cliente que para de ler fazia a memória crescer e travava o desligamento | importante | sim | Fila de saída limitada por cliente (`MaxQueuedFramesPerClient`), escrita interrompível pelo desligamento e pela desconexão. Dois testes novos em `GatewayTests` |
+| I3: protocolo e plano diferentes do aprovado (versão no login, não no envelope; sem relógio da simulação, ID do mapa nem RNG) | importante | sim | Documentado em `ProtocolVersion.cs` e no doc do módulo que o envelope e o começo do login nunca mudam. **Precisa da aprovação do dono no `/fechar`.** Os outros desvios vão para o report (lista abaixo) |
+| I4: nenhum teste fixava os bytes do protocolo | importante | sim | Testes de bytes fixos para o envelope, cada mensagem e os números de tipo |
+| M1: o gateway cria o `EntityId` | menor | sim | TD-0008 (fatia 2, com os monstros); o log deixou de chamar o ID de "connection" |
+| M2: ordem das operações no gateway | menor | sim | O nome é liberado antes de o mundo saber da saída; o motivo do fechamento é gravado antes de fechar a fila. O `demo` espera cada bot entrar antes de conectar o próximo, então os pontos de entrada não dependem do tempo da rede. O `LoginAccepted` continua antes do `PlayerJoined`, de propósito: o cliente sempre recebe o aceite antes das mensagens do mapa |
+| M3: controle das conexões no listener | menor | sim | A conexão é registrada antes de começar; erro inesperado vai para o log, com `try/finally` |
+| M4: pausas fixas nos testes de rede | menor | sim | `DemoServer.OnlinePlayers` e espera por condição; a corrida do `GatewayTests` sumiu com a nova ordem (M2) |
+| M5: marcas de CA em testes que não provam o critério | menor | sim | Marcas retiradas dos testes de unidade; os testes continuam iguais |
+| M6: teste do loop de ticks com relógio real e asserção trivial | menor | sim | `ManualTimeProvider`: 1 segundo dá exatamente 10 ou 20 ticks |
+| M7: o teste do CA-09 não pegava diferença entre processos | menor | sim | Hash gravado da sequência de mensagens; conferido igual em três processos |
+| M8: o bot não tratava mensagem inválida do servidor | menor | sim | O bot para, avisa e se marca como desconectado |
+| M9: itens provisórios faltando | menor | sim | TD-0007 e TD-0008; TD-0004 completado |
+| E1: `MapSimulation` virando classe-deus | estilo | sim | Visibilidade extraída para `AreaOfInterest`; `PlanPath` e `TakeStep` com nomes; campos renomeados. O hash do CA-09 não mudou: as mensagens e a ordem são as mesmas |
+| E2: `RunConnectionAsync` longo | estilo | sim | Dividido em `LoginAsync` e `PlayAsync` |
+| E3: `GridMapText.Parse` longo | estilo | sim | Dividido em `ParseSpawns` e `ParseTiles` |
+| E4: `WorldView` mistura estado com texto; bloqueios repetidos no bot | estilo | em parte | Bloqueios num único `ReadView`. A troca por mudanças tipadas fica para a mudança do `WorldView` para `Elysium.Classic.Client` (TD-0004, fatia 1) |
+| E5: comando `walk` no `Program.cs` e argumentos sem validação | estilo | sim | `WalkCommand` e validação; argumento inválido mostra a mensagem de uso |
+| E6: código repetido | estilo | sim | `Frame.FromMessage` substitui três cópias; `MoveRequest` e `MoveRejected` conferem o `writer` |
+| E7: nomes e API | estilo | sim | `CoreMessageTypes` foi para `Elysium.Core.Protocol`; o parâmetro de versão só para testes saiu do `LoginAsync`; `LoginResult` não aceita estado impossível; `connectionNumber` |
+
+Desvios da spec e do plano aprovados, para o report e para a decisão do dono (I3):
+
+- A versão do protocolo está no primeiro campo do `LoginRequest`, não em cada envelope. Por isso o envelope e o começo do login ficam iguais em todas as versões.
+- Não existe interface de "relógio da simulação": a simulação só conta ticks, e o `TickRunner` usa `TimeProvider`. Isso cumpre o INV-04 sem precisar da exceção de API proibida.
+- Não existe RNG injetado (a spec cita "relógio e RNG injetados"): nada nesta fatia sorteia. Ele nasce com o primeiro sorteio (drops, na fatia 2).
+- O gateway não envia comandos "pelo ID do mapa": com um mapa só, o mundo é o próprio `MapActor`. O ID do mapa entra com o segundo mapa.
 
 ## Notas para a próxima sessão
 
-- Desenho combinado no plano: a simulação só conhece o número do tick (sem relógio); o loop de ticks usa `TimeProvider` só na montagem. Por isso nenhum arquivo precisa da exceção de API proibida.
+- Desenho adotado na implementação (diferente do plano; ver "Revisão"): a simulação só conhece o número do tick (sem relógio); o loop de ticks usa `TimeProvider` só na montagem. Por isso nenhum arquivo precisa da exceção de API proibida.
 - Pontos de entrada: o jogador entra no ponto `jogadores no mapa % quantidade de pontos`. Com o servidor vazio, Ana, Bruno e Caio entram nos pontos 0, 1 e 2; o mapa de demonstração põe 0 e 1 perto e 2 longe.
 - Faixas de tipo de mensagem: Núcleo 1–99, Classic 100–999, jogo 1000 em diante.
-- Todas as tarefas concluídas. Próxima etapa: `/revisar`.
+- Todas as tarefas concluídas e revisão feita. Próxima etapa: `/fechar`.
 - Para o report: o plano falava em "envelope com tamanho, tipo e versão"; a versão ficou no primeiro campo do `LoginRequest`, não em cada envelope (evita 2 bytes por mensagem e é conferida antes de qualquer outra coisa). O efeito para o CA-02 é o mesmo.
 - Para o report: o `MovesRefused` do bot foi acrescentado depois do teste manual, porque o `walk` para um tile bloqueado esperava 60 segundos à toa.
 - Verificado à mão nesta sessão: servidor de demonstração + `demo` (PASSED, duas vezes no mesmo servidor) e `walk` (chegada e recusa). **Não verificado:** o desligamento com `Ctrl+C`, porque aqui o servidor foi parado à força; fica para o teste do dono (CA-11).

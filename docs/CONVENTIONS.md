@@ -66,10 +66,12 @@ A IA imita o código que já existe. Por isso, os melhores exemplos de cada padr
 
 | Para... | Siga |
 |---|---|
-| criar uma mensagem de rede | `src/framework/Elysium.Classic.Shared/Messages/EntityMoved.cs` (e registre o tipo em `ClassicMessageTypes`) |
-| criar um ator com fila e tick | `src/framework/Elysium.Classic.Server/Maps/MapActor.cs` |
-| escrever regras de simulação determinísticas | `src/framework/Elysium.Classic.Server/Maps/MapSimulation.cs` |
+| criar uma mensagem de rede | `src/framework/Elysium.Classic.Shared/Messages/EntityMoved.cs` (registre o tipo em `ClassicMessageTypes` e fixe os bytes num teste, como em `ClassicMessageTests`) |
+| criar um ator com fila e tick (com limite de trabalho por tick e por jogador) | `src/framework/Elysium.Classic.Server/Maps/MapActor.cs` |
+| escrever regras de simulação determinísticas | `src/framework/Elysium.Classic.Server/Maps/MapSimulation.cs`, que delega a visibilidade a `AreaOfInterest.cs` |
 | testar a simulação com ticks controlados | `tests/Elysium.Classic.Server.Tests/Maps/MapMovementTests.cs` |
+| provar determinismo entre processos | `tests/Elysium.Classic.Server.Tests/Maps/MapActorTests.cs` (hash gravado da sequência de mensagens) |
+| testar algo que depende de tempo real | `tests/Elysium.Core.Server.Tests/Actors/TickRunnerTests.cs`, com o `ManualTimeProvider` |
 | testar algo pela rede de verdade | `tests/Elysium.Core.Server.Tests/Sessions/GatewayTests.cs` |
 | escrever mensagens de log | `src/core/Elysium.Core.Server/Sessions/Gateway.cs` (`[LoggerMessage]`) |
 

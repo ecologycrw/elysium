@@ -119,7 +119,7 @@ O PostgreSQL é a fonte da verdade a partir da fatia 2. Antes disso, uma impleme
 
 ## Rede
 
-- **TCP primeiro**, atrás de uma interface de transporte. UDP, QUIC ou WebSocket entram só se uma medição pedir ([ADR 0005](adr/0005-tcp-primeiro.md)).
+- **TCP primeiro**, atrás de uma interface de transporte. UDP, QUIC ou WebSocket entram só se uma medição pedir ([ADR 0005](adr/0005-tcp-primeiro.md)). Hoje essa interface é um `Stream`: o gateway roda qualquer conexão que chegue como `Stream`, e o TCP é só quem as aceita.
 - Criptografia de verdade (TLS) antes de qualquer teste aberto ao público.
 - As mensagens são tipos C# na biblioteca compartilhada, com serialização gerada na compilação (por enquanto escrita à mão; ver [TECH_DEBT.md](TECH_DEBT.md)). O protocolo tem **versão explícita** (INV-11), conferida na primeira mensagem de cada conexão.
 - Envio só do que mudou, posições na grade em formato compacto e mensagens agrupadas por tick.

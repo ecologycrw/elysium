@@ -13,7 +13,7 @@ atualizado-em: 2026-11-17
 
 ## Próxima ação
 
-`/revisar` a fatia 0 (revisão independente), depois `/fechar`.
+`/fechar` a fatia 0 (report e PR). A revisão independente foi feita e os achados corrigidos.
 
 ## Bloqueios
 
