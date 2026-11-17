@@ -1,7 +1,7 @@
 ---
 id: 0001
 titulo: Dois jogadores se veem
-status: aprovada
+status: em-andamento
 aprovada-em: 2026-11-17
 ---
 
