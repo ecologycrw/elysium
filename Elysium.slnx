@@ -12,6 +12,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Elysium.Architecture.Tests/Elysium.Architecture.Tests.csproj" />
     <Project Path="tests/Elysium.Checks.Tests/Elysium.Checks.Tests.csproj" />
+    <Project Path="tests/Elysium.Core.Tests/Elysium.Core.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Elysium.Checks/Elysium.Checks.csproj" />

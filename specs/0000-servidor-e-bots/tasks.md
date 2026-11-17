@@ -4,7 +4,7 @@ Este arquivo é a memória entre sessões: quem chegar depois lê aqui o que foi
 
 Legenda: `[ ]` pendente · `[~]` em andamento · `[x]` concluída · `[!]` bloqueada
 
-- [ ] T01: Base do protocolo em `Elysium.Core`: `EntityId`, leitor e escritor binários, envelope (tamanho + tipo) com tamanho máximo, leitura e escrita de envelopes num stream, `ProtocolException` (CA-08). Verificação: testes em `Elysium.Core.Tests` (ida e volta, dados truncados, envelope grande demais).
+- [x] T01: Base do protocolo em `Elysium.Core`: `EntityId`, leitor e escritor binários, envelope (tamanho + tipo) com tamanho máximo, leitura e escrita de envelopes num stream, `ProtocolException` (CA-08). Verificação: testes em `Elysium.Core.Tests` (ida e volta, dados truncados, envelope grande demais).
 - [ ] T02: Mensagens de login em `Elysium.Core` (`LoginRequest`, `LoginAccepted`, `LoginRejected`) e a versão 1 do protocolo (CA-01, CA-02). Verificação: testes de ida e volta; a versão é lida antes do resto.
 - [ ] T03: `Elysium.Classic.Shared`: `TilePosition`, mapa em grade (livre, bloqueado, pontos de entrada), leitura do texto do mapa com validação, mensagens de movimento e de visibilidade e o decodificador delas. Verificação: testes em `Elysium.Classic.Shared.Tests`.
 - [ ] T04: `Elysium.Classic.Server`: simulação do mapa com entrada, saída, pontos de entrada e AOI por células (CA-05, CA-06, CA-07). Verificação: testes determinísticos em `Elysium.Classic.Server.Tests`.
