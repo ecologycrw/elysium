@@ -1,7 +1,7 @@
 ---
 id: 0012
 titulo: SDL3 para janela, entrada e GPU, com shaders HLSL compilados pelo DXC
-status: proposta
+status: aceita
 data: 2026-11-17
 substitui:
 substituida-por:
@@ -41,7 +41,7 @@ Feito em 2026-11-17, no computador do dono (T02 da fatia 1): uma janela com um c
 | Desenha com Vulkan? | sim: forçado com a variável de ambiente `SDL_GPU_DRIVER=vulkan` |
 | A biblioteca nativa vem no pacote? | sim, para Windows, Linux, macOS, Android e iOS (x64 e ARM) |
 | Compatível com NativeAOT? | sim: o build com os analisadores de AOT não dá aviso, e a publicação nativa gerou um programa de 1,2 MB (mais a `SDL3.dll`) que abriu a janela |
-| A janela abre no computador do dono? | confirmado pelo dono em: *(pendente)* |
+| A janela abre no computador do dono? | sim: confirmado pelo dono em 2026-11-17, que também aprovou este ADR e o DXC como ferramenta de shaders |
 
 Dois cuidados para quando o cliente for publicado como programa nativo (fatia de distribuição):
 
