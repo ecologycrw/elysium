@@ -3,7 +3,8 @@ namespace Elysium.Architecture.Tests;
 /// <summary>
 /// INV-02: dependencies only go down (Game -> Classic -> Core),
 /// shared code never depends on server or client code, and server and client never depend on each other.
-/// Layers are recognized by namespace, which IDE0130 keeps equal to the project name.
+/// Layers are recognized by the assembly each type comes from, whose name is the project name, so code without a
+/// namespace (the top-level statements of a Program.cs) is checked like the rest (P-0005).
 /// </summary>
 public sealed class LayerTests
 {

@@ -13,11 +13,9 @@ public sealed class PlatformTests
     [Trait("CA", "0001-CA-08")]
     public void No_engine_or_game_code_outside_the_platform_project_uses_SDL_types()
     {
-        // Names the type that breaks the rule. A program's top-level statements have no namespace, so this rule
-        // does not see them; the next test, on the assembly references, catches them.
         var violations = EngineModel.ForbiddenDependencies(
-            isSource: ns => IsElysium(ns) && !IsPlatform(ns),
-            isForbiddenTarget: ns => ns == "SDL" || ns.StartsWith("SDL.", StringComparison.Ordinal));
+            isSource: assembly => assembly != PlatformProject,
+            isForbiddenTarget: assembly => assembly == SdlAssembly);
 
         Assert.Empty(violations);
     }
@@ -30,15 +28,10 @@ public sealed class PlatformTests
             .Where(name => EngineModel.TryLoad(name)?.GetReferencedAssemblies().Any(IsSdl) == true)
             .ToList();
 
-        // The platform project must reference it, or this test would pass for the wrong reason (a renamed library).
+        // The platform project must reference it, or both tests would pass for the wrong reason (a renamed library).
         Assert.Equal([PlatformProject], referencing);
     }
 
     private static bool IsSdl(System.Reflection.AssemblyName reference) =>
         string.Equals(reference.Name, SdlAssembly, StringComparison.Ordinal);
-
-    private static bool IsElysium(string ns) => ns == "Elysium" || ns.StartsWith("Elysium.", StringComparison.Ordinal);
-
-    private static bool IsPlatform(string ns) =>
-        ns == PlatformProject || ns.StartsWith(PlatformProject + ".", StringComparison.Ordinal);
 }
