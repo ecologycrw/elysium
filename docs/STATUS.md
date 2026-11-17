@@ -9,11 +9,11 @@ atualizado-em: 2026-11-17
 
 ## Agora
 
-**Fatia 1 (Dois jogadores se veem): em implementação.** T01 a T06 concluídas, mais a T04b (correção da P-0004): testes de mutação, protótipo gráfico (ADR 0012 aceito), estado do mundo, ligação com o servidor, movimento suave, câmera 3/4 e clique para tile. O PR #5 está aberto como rascunho, para a CI rodar o job `mutation` desde já. Ver [a spec](../specs/0001-dois-jogadores-se-veem/spec.md) e o [tasks.md](../specs/0001-dois-jogadores-se-veem/tasks.md).
+**Fatia 1 (Dois jogadores se veem): em implementação.** T01 a T07 concluídas, mais a T04b (correção da P-0004): testes de mutação, protótipo gráfico (ADR 0012 aceito), estado do mundo, ligação com o servidor, movimento suave, câmera 3/4, clique para tile e montagem da cena, com o teste de memória por quadro. O PR #5 está aberto como rascunho, para a CI rodar o job `mutation` desde já. Ver [a spec](../specs/0001-dois-jogadores-se-veem/spec.md) e o [tasks.md](../specs/0001-dois-jogadores-se-veem/tasks.md).
 
 ## Próxima ação
 
-`/implementar` a T07 (cena e teste de memória por quadro). Ler antes a nota da T03 no `tasks.md`: o CA-07 pode exigir uma decisão do dono.
+`/implementar` a T08 (desenhar a cena na janela e ler o mouse, em `Elysium.Core.Client.Sdl`).
 
 ## Bloqueios
 

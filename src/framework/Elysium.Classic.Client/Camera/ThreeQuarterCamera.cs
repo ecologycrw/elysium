@@ -5,7 +5,7 @@ namespace Elysium.Classic.Client.Camera;
 /// <summary>
 /// A perspective camera at a fixed angle that follows a point on the ground, as in the classic genre.
 /// It gives the matrices for the GPU and converts between the world and the screen in both directions:
-/// a world point to a pixel (for drawing over the scene) and a pixel to the ground (for clicking).
+/// a world point to a pixel (for drawing over the scene) and a pixel to the ground or to a height (for clicking).
 /// Screen points are in pixels, from the top-left corner of the window. Updating it does not allocate.
 /// </summary>
 public sealed class ThreeQuarterCamera
@@ -73,21 +73,27 @@ public sealed class ThreeQuarterCamera
     /// The point on the ground (Y = 0) under the pixel <paramref name="screen"/>. False when the pixel shows the
     /// sky, where the ray from the camera never reaches the ground.
     /// </summary>
-    public bool TryPickGround(Vector2 screen, out Vector3 ground)
+    public bool TryPickGround(Vector2 screen, out Vector3 ground) => TryPickAtHeight(screen, 0, out ground);
+
+    /// <summary>
+    /// The point at height <paramref name="height"/> under the pixel <paramref name="screen"/>, as if the ground
+    /// were raised to that height. False when the ray from the camera never comes down to it.
+    /// </summary>
+    public bool TryPickAtHeight(Vector2 screen, float height, out Vector3 point)
     {
         var ndc = new Vector2((screen.X / ViewportSize.X * 2) - 1, 1 - (screen.Y / ViewportSize.Y * 2));
         var near = Unproject(new Vector3(ndc, 0));
         var far = Unproject(new Vector3(ndc, 1));
         var direction = far - near;
-        if (direction.Y >= 0)
+        if (direction.Y >= 0 || near.Y <= height)
         {
-            ground = default;
+            point = default;
             return false;
         }
 
-        var distance = -near.Y / direction.Y;
-        ground = near + (direction * distance);
-        ground.Y = 0;
+        var distance = (height - near.Y) / direction.Y;
+        point = near + (direction * distance);
+        point.Y = height;
         return true;
     }
 

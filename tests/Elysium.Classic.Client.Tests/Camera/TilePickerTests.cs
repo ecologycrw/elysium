@@ -6,7 +6,11 @@ namespace Elysium.Classic.Client.Tests.Camera;
 
 public sealed class TilePickerTests
 {
+    private const float BlockHeight = 0.6f;
+
     private static readonly GridMap Map = new(64, 40, blockedTiles: [], spawnPoints: [new TilePosition(10, 10)]);
+    private static readonly TilePosition Block = new(20, 15);
+    private static readonly GridMap MapWithBlock = new(64, 40, blockedTiles: [Block], spawnPoints: [new TilePosition(10, 10)]);
 
     /// <summary>Camera angles and window sizes the client must handle, from small windows to wide screens.</summary>
     public static TheoryData<float, float, int, int> CamerasAndWindows => new()
@@ -103,6 +107,61 @@ public sealed class TilePickerTests
         Assert.Equal(new TilePosition(0, 0), corner);
     }
 
+    [Theory]
+    [Trait("CA", "0001-CA-04")]
+    [MemberData(nameof(CamerasAndWindows))]
+    public void Clicking_the_top_of_a_raised_blocked_tile_picks_it_and_not_the_ground_behind(float pitch, float yaw, int width, int height)
+    {
+        var camera = Camera(pitch, yaw, target: Block, width, height);
+
+        foreach (var corner in new[] { new Vector2(-0.45f, -0.45f), new Vector2(0.45f, 0.45f), new Vector2(0.45f, -0.45f), new Vector2(-0.45f, 0.45f) })
+        {
+            var onTop = TileSpace.ToWorld(new Vector2(Block.X + corner.X, Block.Y + corner.Y)) with { Y = BlockHeight };
+            Assert.True(camera.TryProject(onTop, out var pixel));
+
+            Assert.True(TilePicker.TryPickTile(camera, pixel, MapWithBlock, BlockHeight, out var tile));
+            Assert.Equal(Block, tile);
+        }
+    }
+
+    [Theory]
+    [Trait("CA", "0001-CA-04")]
+    [MemberData(nameof(CamerasAndWindows))]
+    public void Clicking_the_side_of_a_raised_blocked_tile_that_faces_the_camera_picks_it(float pitch, float yaw, int width, int height)
+    {
+        var camera = Camera(pitch, yaw, target: Block, width, height);
+        var towardCamera = TowardCamera(camera);
+
+        foreach (var across in new[] { -0.4f, -0.2f, 0, 0.2f, 0.4f })
+        {
+            var side = (towardCamera * 0.49f) + (new Vector2(towardCamera.Y, towardCamera.X) * across);
+            var onSide = TileSpace.ToWorld(new Vector2(Block.X + side.X, Block.Y + side.Y)) with { Y = BlockHeight / 2 };
+            Assert.True(camera.TryProject(onSide, out var pixel));
+
+            Assert.True(TilePicker.TryPickTile(camera, pixel, MapWithBlock, BlockHeight, out var tile));
+            Assert.Equal(Block, tile);
+        }
+    }
+
+    [Theory]
+    [Trait("CA", "0001-CA-02")]
+    [MemberData(nameof(CamerasAndWindows))]
+    public void The_ground_in_front_of_and_beyond_a_raised_blocked_tile_is_still_picked(float pitch, float yaw, int width, int height)
+    {
+        var camera = Camera(pitch, yaw, target: Block, width, height);
+        var towardCamera = TowardCamera(camera);
+        var inFront = new TilePosition(Block.X + (int)towardCamera.X, Block.Y + (int)towardCamera.Y);
+        var beyond = new TilePosition(Block.X - (2 * (int)towardCamera.X), Block.Y - (2 * (int)towardCamera.Y));
+
+        foreach (var expected in new[] { inFront, beyond })
+        {
+            Assert.True(camera.TryProject(TileSpace.ToWorld(expected), out var pixel));
+
+            Assert.True(TilePicker.TryPickTile(camera, pixel, MapWithBlock, BlockHeight, out var tile));
+            Assert.Equal(expected, tile);
+        }
+    }
+
     [Fact]
     public void Camera_rules_that_cannot_work_are_refused()
     {
@@ -110,6 +169,15 @@ public sealed class TilePickerTests
         Assert.Throws<ArgumentOutOfRangeException>(() => new CameraRules(90, 0, 10, 45));
         Assert.Throws<ArgumentOutOfRangeException>(() => new CameraRules(50, 0, 0, 45));
         Assert.Throws<ArgumentOutOfRangeException>(() => new CameraRules(50, 0, 10, 180));
+    }
+
+    /// <summary>The axis (one column or one row, as X and Y in tiles) along which the camera mostly looks back at the ground.</summary>
+    private static Vector2 TowardCamera(ThreeQuarterCamera camera)
+    {
+        var offset = camera.Position - camera.Target;
+        return MathF.Abs(offset.X) >= MathF.Abs(offset.Z)
+            ? new Vector2(MathF.Sign(offset.X), 0)
+            : new Vector2(0, MathF.Sign(offset.Z));
     }
 
     private static ThreeQuarterCamera Camera(float pitch, float yaw, TilePosition target, int width, int height)

@@ -6,8 +6,9 @@ namespace Elysium.Classic.Shared.Messages;
 
 /// <summary>
 /// Server to client: an entity in view (or the player's own character) stepped to <paramref name="Position"/>.
+/// A value type: clients read one every step, and reading it leaves nothing for the garbage collector.
 /// </summary>
-public sealed record EntityMoved(EntityId Id, TilePosition Position) : IMessage<EntityMoved>
+public readonly record struct EntityMoved(EntityId Id, TilePosition Position) : IMessage<EntityMoved>
 {
     public static ushort TypeId => ClassicMessageTypes.EntityMoved;
 

@@ -5,8 +5,9 @@ namespace Elysium.Classic.Shared.Messages;
 
 /// <summary>
 /// Server to client: the move request to <paramref name="Destination"/> was refused, and the character did not move.
+/// A value type, like <see cref="EntityMoved"/>: reading it leaves nothing for the garbage collector.
 /// </summary>
-public sealed record MoveRejected(TilePosition Destination, MoveRejectReason Reason) : IMessage<MoveRejected>
+public readonly record struct MoveRejected(TilePosition Destination, MoveRejectReason Reason) : IMessage<MoveRejected>
 {
     public static ushort TypeId => ClassicMessageTypes.MoveRejected;
 
