@@ -22,6 +22,18 @@ Formato de cada entrada (o modelo completo fica em `templates/proposal.md`):
 - Prioridade sugerida: média
 - Status: aberta
 
+### P-0002: régua de qualidade sênior
+- Origem: feedback do dono, no fim da implementação da fatia 0
+- Tipo: regra e trava
+- Evidência: o dono não lê código e quer garantir o padrão sênior antes que a fatia 1 copie os padrões da fatia 0. O pedido dele tem três partes:
+  1. Uma seção curta "Régua de qualidade" no `docs/CONVENTIONS.md`, com o que um revisor sênior recusaria no Elysium: funções longas, classes com mais de uma responsabilidade, código repetido, tratamento de erro que esconde o problema, nomes vagos (`Manager`, `Helper`, `Data`) e testes que verificam a implementação em vez do comportamento.
+  2. Esses itens na lista obrigatória do subagente `revisor`.
+  3. Os analisadores de complexidade do .NET ligados (CA1502, CA1505, CA1506), com limites calibrados no código da fatia 0.
+
+  As partes 2 e 3 mexem em travas (`.claude/agents/` e a configuração de análise) e precisam da aprovação do dono. Como a prioridade é alta e o objetivo é chegar antes da fatia 1, a retrospectiva da fatia 0 pode decidir aplicá-la ainda neste PR.
+- Prioridade sugerida: alta
+- Status: aberta
+
 ## Processadas
 
 *(nenhuma)*
