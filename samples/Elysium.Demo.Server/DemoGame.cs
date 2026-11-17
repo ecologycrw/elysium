@@ -16,6 +16,9 @@ public static class DemoGame
     /// <summary>One step every 5 ticks: 4 tiles per second at 20 ticks per second.</summary>
     public static MapRules MapRules { get; } = new(viewRadius: 8, ticksPerStep: 5, maxPathLength: 64);
 
+    /// <summary>A normal client sends at most one move request per tick; 16 waiting messages leaves room for bursts.</summary>
+    public static MapActorLimits MapActorLimits { get; } = new(maxCommandsPerTick: 2000, maxPendingFramesPerPlayer: 16);
+
     public static GatewayOptions GatewayOptions { get; } = new(maxFrameBodySize: 512, maxNameLength: 16);
 
     /// <summary>Reads the demo map, which is built into the program.</summary>

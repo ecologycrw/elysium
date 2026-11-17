@@ -31,7 +31,7 @@ public sealed class DemoServer : IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(loggerFactory);
         var registry = new SessionRegistry();
-        var map = new MapActor(DemoGame.LoadMap(), DemoGame.MapRules, registry);
+        var map = new MapActor(DemoGame.LoadMap(), DemoGame.MapRules, DemoGame.MapActorLimits, registry);
         var runner = new TickRunner(map, DemoGame.TicksPerSecond, timeProvider, loggerFactory.CreateLogger<TickRunner>());
         var gateway = new Gateway(registry, map, DemoGame.GatewayOptions, loggerFactory.CreateLogger<Gateway>());
 
