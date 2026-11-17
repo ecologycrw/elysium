@@ -9,11 +9,11 @@ atualizado-em: 2026-11-17
 
 ## Agora
 
-Preparação, **parte 4 de 4**: GitHub (repositório, proteções, login da IA, assinatura dos commits e PR #1). Ver [setup/GITHUB.md](setup/GITHUB.md). Quando o PR #1 for aprovado e mergeado, a preparação termina.
+Preparação, **parte 4 de 4**: GitHub (repositório, proteções, login da IA, assinatura dos commits e PR #1). Ver [setup/GITHUB.md](setup/GITHUB.md). Quando o PR #2 for aprovado e mergeado, a preparação termina.
 
 ## Próxima ação
 
-Depois do merge do PR #1: `/planejar` a fatia 0 (servidor e bots).
+Depois do merge do PR #2: `/planejar` a fatia 0 (servidor e bots).
 
 ## Bloqueios
 
@@ -28,3 +28,4 @@ Nenhum.
 | 2026-11-17 | Parte 2 concluída: 5 projetos, testes de arquitetura, `Elysium.Checks`, hooks do Git e CI |
 | 2026-11-17 | Parte 3 concluída: ambiente de IA; retrospectiva passa a rodar no mesmo PR da fatia, antes do merge |
 | 2026-11-17 | Parte 4: guia do GitHub e regra de proteção da `main` escritos; PR #1 aberto |
+| 2026-11-17 | PR #1 bloqueado por commits sem assinatura (feitos antes da chave); commits copiados assinados para `preparacao/assinada` e PR #2 aberto no lugar |

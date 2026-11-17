@@ -58,6 +58,8 @@ Por último, abra o **Gerenciador de Credenciais do Windows → Credenciais do W
 
 ## 5. Chave de assinatura dos commits (dono, terminal)
 
+> **Faça este passo antes do primeiro commit do projeto.** A regra da `main` exige commits assinados, e um commit feito antes da chave não pode ser assinado depois sem reescrever o histórico, o que é proibido. Na preparação do Elysium isso aconteceu: os commits foram copiados (`git cherry-pick`) para uma branch nova, já assinados, e o PR foi aberto de novo.
+
 Crie a chave. Quando ela pedir uma senha (*passphrase*), aperte **Enter** duas vezes, sem digitar nada:
 
 ```bash
