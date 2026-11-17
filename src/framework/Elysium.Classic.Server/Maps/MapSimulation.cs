@@ -6,7 +6,8 @@ using Elysium.Core.Server.Sessions;
 namespace Elysium.Classic.Server.Maps;
 
 /// <summary>
-/// The rules of one grid map: who is on it, where, and who sees whom.
+/// The rules of one grid map: who is on it, where they enter, and how they walk.
+/// Who sees whom is delegated to <see cref="AreaOfInterest"/>, and paths to <see cref="GridPathfinder"/>.
 /// Single-threaded and deterministic (INV-03, INV-04): time is the number of ticks run so far,
 /// and every loop goes in entity ID order. It knows nothing about the network; it only queues
 /// messages in the <see cref="IClientOutbox"/>.
@@ -17,9 +18,8 @@ public sealed class MapSimulation
     private readonly MapRules _rules;
     private readonly IClientOutbox _outbox;
     private readonly SortedDictionary<EntityId, MapEntity> _entities = [];
-    private readonly AreaOfInterestGrid _grid;
-    private readonly SortedSet<EntityId> _scratch = [];
-    private readonly List<TilePosition> _pathScratch = [];
+    private readonly AreaOfInterest _areaOfInterest;
+    private readonly List<TilePosition> _pathBuffer = [];
 
     public MapSimulation(GridMap map, MapRules rules, IClientOutbox outbox)
     {
@@ -29,7 +29,7 @@ public sealed class MapSimulation
         _map = map;
         _rules = rules;
         _outbox = outbox;
-        _grid = new AreaOfInterestGrid(rules.ViewRadius);
+        _areaOfInterest = new AreaOfInterest(rules.ViewRadius, _entities, outbox);
     }
 
     /// <summary>How many ticks have run. This is the simulation's only notion of time.</summary>
@@ -51,25 +51,17 @@ public sealed class MapSimulation
         var spawn = _map.SpawnPoints[_entities.Count % _map.SpawnPoints.Count];
         var entity = new MapEntity(id, name, spawn);
         _entities.Add(id, entity);
-        _grid.Add(id, spawn);
 
         _outbox.Send(id, new EnteredMap(id, spawn));
-        UpdateVisibility(entity, moved: false);
+        _areaOfInterest.Enter(entity);
     }
 
     /// <summary>Takes a character off the map. Everyone who saw it is told it disappeared.</summary>
     public void Leave(EntityId id)
     {
-        if (!_entities.Remove(id, out var entity))
+        if (_entities.Remove(id, out var entity))
         {
-            return;
-        }
-
-        _grid.Remove(id, entity.Position);
-        foreach (var otherId in entity.Visible)
-        {
-            _entities[otherId].Visible.Remove(id);
-            _outbox.Send(otherId, new EntityDisappeared(id));
+            _areaOfInterest.Leave(entity);
         }
     }
 
@@ -98,28 +90,14 @@ public sealed class MapSimulation
             return;
         }
 
-        MoveRejectReason? reason = null;
-        if (!_map.Contains(destination))
-        {
-            reason = MoveRejectReason.OutOfMap;
-        }
-        else if (!_map.IsWalkable(destination))
-        {
-            reason = MoveRejectReason.Blocked;
-        }
-        else if (!GridPathfinder.TryFindPath(_map, entity.Position, destination, _rules.MaxPathLength, _pathScratch))
-        {
-            reason = MoveRejectReason.Unreachable;
-        }
-
         entity.Path.Clear();
-        if (reason is { } refused)
+        if (PlanPath(entity.Position, destination) is { } refused)
         {
             _outbox.Send(id, new MoveRejected(destination, refused));
             return;
         }
 
-        foreach (var step in _pathScratch)
+        foreach (var step in _pathBuffer)
         {
             entity.Path.Enqueue(step);
         }
@@ -133,54 +111,41 @@ public sealed class MapSimulation
         CurrentTick++;
         foreach (var entity in _entities.Values)
         {
-            if (entity.Path.Count == 0 || CurrentTick < entity.NextStepTick)
+            if (entity.Path.Count > 0 && CurrentTick >= entity.NextStepTick)
             {
-                continue;
+                TakeStep(entity);
             }
-
-            var from = entity.Position;
-            var to = entity.Path.Dequeue();
-            entity.Position = to;
-            entity.NextStepTick = CurrentTick + _rules.TicksPerStep;
-            _grid.Move(entity.Id, from, to);
-
-            _outbox.Send(entity.Id, new EntityMoved(entity.Id, to));
-            UpdateVisibility(entity, moved: true);
         }
     }
 
     /// <summary>
-    /// Recomputes what <paramref name="entity"/> sees after it entered or stepped, and tells both sides about
-    /// every change. When it <paramref name="moved"/>, everyone who still sees it is told its new position.
+    /// Fills <see cref="_pathBuffer"/> with the steps from <paramref name="from"/> to <paramref name="destination"/>,
+    /// or returns why the destination is refused.
     /// </summary>
-    private void UpdateVisibility(MapEntity entity, bool moved)
+    private MoveRejectReason? PlanPath(TilePosition from, TilePosition destination)
     {
-        _scratch.Clear();
-        _grid.Candidates(entity.Position, _scratch);
-        _scratch.Remove(entity.Id);
-        _scratch.RemoveWhere(otherId => entity.Position.ChebyshevDistance(_entities[otherId].Position) > _rules.ViewRadius);
-
-        foreach (var otherId in entity.Visible.Where(otherId => !_scratch.Contains(otherId)).ToList())
+        if (!_map.Contains(destination))
         {
-            entity.Visible.Remove(otherId);
-            _entities[otherId].Visible.Remove(entity.Id);
-            _outbox.Send(entity.Id, new EntityDisappeared(otherId));
-            _outbox.Send(otherId, new EntityDisappeared(entity.Id));
+            return MoveRejectReason.OutOfMap;
         }
 
-        foreach (var otherId in _scratch)
+        if (!_map.IsWalkable(destination))
         {
-            var other = _entities[otherId];
-            if (entity.Visible.Add(otherId))
-            {
-                other.Visible.Add(entity.Id);
-                _outbox.Send(entity.Id, new EntityAppeared(otherId, other.Name, other.Position));
-                _outbox.Send(otherId, new EntityAppeared(entity.Id, entity.Name, entity.Position));
-            }
-            else if (moved)
-            {
-                _outbox.Send(otherId, new EntityMoved(entity.Id, entity.Position));
-            }
+            return MoveRejectReason.Blocked;
         }
+
+        return GridPathfinder.TryFindPath(_map, from, destination, _rules.MaxPathLength, _pathBuffer)
+            ? null
+            : MoveRejectReason.Unreachable;
+    }
+
+    private void TakeStep(MapEntity entity)
+    {
+        var from = entity.Position;
+        entity.Position = entity.Path.Dequeue();
+        entity.NextStepTick = CurrentTick + _rules.TicksPerStep;
+
+        _outbox.Send(entity.Id, new EntityMoved(entity.Id, entity.Position));
+        _areaOfInterest.Step(entity, from);
     }
 }
