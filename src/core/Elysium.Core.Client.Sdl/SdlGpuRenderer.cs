@@ -1,13 +1,14 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Elysium.Core.Client.Rendering;
 using SDL;
 
 namespace Elysium.Core.Client.Sdl;
 
 /// <summary>
-/// Draws with SDL3 GPU, which picks Direct3D 12 or Vulkan on Windows (and Metal on Apple systems).
-/// Slice 1, T02 prototype: draws one lit cube. T08 turns it into the scene renderer.
-/// Not thread-safe: use it from the thread that owns the window.
+/// Draws a <see cref="Scene"/> with SDL3 GPU, which picks Direct3D 12 or Vulkan on Windows (and Metal on Apple
+/// systems): every block in one draw call (instancing), lit by the scene's directional light. A frame of a scene
+/// no bigger than the ones before does not allocate. Not thread-safe: use it from the thread that owns the window.
 /// </summary>
 public sealed unsafe class SdlGpuRenderer : IDisposable
 {
@@ -17,6 +18,7 @@ public sealed unsafe class SdlGpuRenderer : IDisposable
     private readonly SdlWindow _window;
     private SDL_GPUDevice* _device;
     private SDL_GPUGraphicsPipeline* _pipeline;
+    private GpuBlockBuffer? _blocks;
     private SDL_GPUTexture* _depth;
     private uint _depthWidth;
     private uint _depthHeight;
@@ -51,7 +53,8 @@ public sealed unsafe class SdlGpuRenderer : IDisposable
                 throw SdlException.FromLastError(nameof(SDL3.SDL_ClaimWindowForGPUDevice));
             }
 
-            renderer._pipeline = renderer.CreateCubePipeline();
+            renderer._pipeline = renderer.CreateBlockPipeline();
+            renderer._blocks = new GpuBlockBuffer(device);
             return renderer;
         }
         catch
@@ -61,9 +64,11 @@ public sealed unsafe class SdlGpuRenderer : IDisposable
         }
     }
 
-    /// <summary>Draws one frame: clears the screen and draws the cube. Skips the frame while the window is minimized.</summary>
-    public void DrawCube(Matrix4x4 viewProjection, Matrix4x4 model)
+    /// <summary>Draws one frame of <paramref name="scene"/>. Skips the frame while the window is minimized.</summary>
+    public void Draw(Scene scene)
     {
+        ArgumentNullException.ThrowIfNull(scene);
+        ObjectDisposedException.ThrowIf(_device is null || _blocks is null, this);
         var commands = SDL3.SDL_AcquireGPUCommandBuffer(_device);
         if (commands is null)
         {
@@ -81,11 +86,17 @@ public sealed unsafe class SdlGpuRenderer : IDisposable
         if (swapchain is not null)
         {
             EnsureDepthTexture(width, height);
-            var transforms = new CubeTransforms(viewProjection, model);
-            SDL3.SDL_PushGPUVertexUniformData(commands, 0, (IntPtr)(&transforms), (uint)sizeof(CubeTransforms));
-            var pass = BeginPass(commands, swapchain);
-            SDL3.SDL_BindGPUGraphicsPipeline(pass, _pipeline);
-            SDL3.SDL_DrawGPUPrimitives(pass, CubeVertexCount, 1, 0, 0);
+            _blocks.Upload(commands, scene.Blocks);
+            PushUniforms(commands, scene);
+            var pass = BeginPass(commands, swapchain, scene.Background);
+            if (!scene.Blocks.IsEmpty)
+            {
+                SDL3.SDL_BindGPUGraphicsPipeline(pass, _pipeline);
+                var buffer = _blocks.Buffer;
+                SDL3.SDL_BindGPUVertexStorageBuffers(pass, 0, &buffer, 1);
+                SDL3.SDL_DrawGPUPrimitives(pass, CubeVertexCount, (uint)scene.Blocks.Length, 0, 0);
+            }
+
             SDL3.SDL_EndGPURenderPass(pass);
         }
 
@@ -102,6 +113,8 @@ public sealed unsafe class SdlGpuRenderer : IDisposable
             return;
         }
 
+        _blocks?.Dispose();
+        _blocks = null;
         if (_depth is not null)
         {
             SDL3.SDL_ReleaseGPUTexture(_device, _depth);
@@ -117,12 +130,20 @@ public sealed unsafe class SdlGpuRenderer : IDisposable
         _device = null;
     }
 
-    private SDL_GPURenderPass* BeginPass(SDL_GPUCommandBuffer* commands, SDL_GPUTexture* swapchain)
+    private static void PushUniforms(SDL_GPUCommandBuffer* commands, Scene scene)
+    {
+        var camera = scene.ViewProjection;
+        SDL3.SDL_PushGPUVertexUniformData(commands, 0, (IntPtr)(&camera), (uint)sizeof(Matrix4x4));
+        var light = new LightUniforms(scene.Light);
+        SDL3.SDL_PushGPUFragmentUniformData(commands, 0, (IntPtr)(&light), (uint)sizeof(LightUniforms));
+    }
+
+    private SDL_GPURenderPass* BeginPass(SDL_GPUCommandBuffer* commands, SDL_GPUTexture* swapchain, ColorRgb background)
     {
         var color = new SDL_GPUColorTargetInfo
         {
             texture = swapchain,
-            clear_color = new SDL_FColor { r = 0.12f, g = 0.14f, b = 0.18f, a = 1f },
+            clear_color = new SDL_FColor { r = background.R, g = background.G, b = background.B, a = 1f },
             load_op = SDL_GPULoadOp.SDL_GPU_LOADOP_CLEAR,
             store_op = SDL_GPUStoreOp.SDL_GPU_STOREOP_STORE,
         };
@@ -170,10 +191,10 @@ public sealed unsafe class SdlGpuRenderer : IDisposable
         _depthHeight = height;
     }
 
-    private SDL_GPUGraphicsPipeline* CreateCubePipeline()
+    private SDL_GPUGraphicsPipeline* CreateBlockPipeline()
     {
-        var vertexShader = LoadShader("cube.vert", SDL_GPUShaderStage.SDL_GPU_SHADERSTAGE_VERTEX, uniformBuffers: 1);
-        var fragmentShader = LoadShader("cube.frag", SDL_GPUShaderStage.SDL_GPU_SHADERSTAGE_FRAGMENT, uniformBuffers: 0);
+        var vertexShader = LoadShader("blocks.vert", SDL_GPUShaderStage.SDL_GPU_SHADERSTAGE_VERTEX, uniformBuffers: 1, storageBuffers: 1);
+        var fragmentShader = LoadShader("blocks.frag", SDL_GPUShaderStage.SDL_GPU_SHADERSTAGE_FRAGMENT, uniformBuffers: 1, storageBuffers: 0);
         try
         {
             var colorTarget = new SDL_GPUColorTargetDescription
@@ -215,7 +236,7 @@ public sealed unsafe class SdlGpuRenderer : IDisposable
     }
 
     /// <summary>Loads a precompiled shader in the format the chosen graphics API accepts (DXIL or SPIR-V).</summary>
-    private SDL_GPUShader* LoadShader(string name, SDL_GPUShaderStage stage, uint uniformBuffers)
+    private SDL_GPUShader* LoadShader(string name, SDL_GPUShaderStage stage, uint uniformBuffers, uint storageBuffers)
     {
         var useDxil = (SDL3.SDL_GetGPUShaderFormats(_device) & SDL_GPUShaderFormat.SDL_GPU_SHADERFORMAT_DXIL) != 0;
         var format = useDxil ? SDL_GPUShaderFormat.SDL_GPU_SHADERFORMAT_DXIL : SDL_GPUShaderFormat.SDL_GPU_SHADERFORMAT_SPIRV;
@@ -233,6 +254,7 @@ public sealed unsafe class SdlGpuRenderer : IDisposable
                 format = format,
                 stage = stage,
                 num_uniform_buffers = uniformBuffers,
+                num_storage_buffers = storageBuffers,
             };
             var shader = SDL3.SDL_CreateGPUShader(_device, &info);
             return shader is not null ? shader : throw SdlException.FromLastError($"{nameof(SDL3.SDL_CreateGPUShader)} ({resource})");
@@ -248,11 +270,16 @@ public sealed unsafe class SdlGpuRenderer : IDisposable
         return bytes;
     }
 
-    /// <summary>The vertex uniform buffer of cube.vert.hlsl, byte for byte.</summary>
+    /// <summary>The fragment uniform buffer of blocks.frag.hlsl, byte for byte.</summary>
     [StructLayout(LayoutKind.Sequential)]
-    private readonly struct CubeTransforms(Matrix4x4 viewProjection, Matrix4x4 model)
+    private readonly struct LightUniforms(DirectionalLight light)
     {
-        public readonly Matrix4x4 ViewProjection = viewProjection;
-        public readonly Matrix4x4 Model = model;
+        public readonly Vector4 TowardsLight = new(TowardsLightOf(light.Direction), 0);
+        public readonly Vector4 LightColor = new(light.Color.R, light.Color.G, light.Color.B, 1);
+        public readonly Vector4 Ambient = new(light.Ambient.R, light.Ambient.G, light.Ambient.B, 1);
+
+        /// <summary>The opposite of where the light travels, at unit length; no direct light for a zero direction.</summary>
+        private static Vector3 TowardsLightOf(Vector3 direction) =>
+            direction == Vector3.Zero ? Vector3.Zero : Vector3.Normalize(-direction);
     }
 }

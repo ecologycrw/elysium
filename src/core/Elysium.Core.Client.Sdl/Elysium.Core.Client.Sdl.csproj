@@ -10,6 +10,10 @@
     <PackageReference Include="ppy.SDL3-CS" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../Elysium.Core.Client/Elysium.Core.Client.csproj" />
+  </ItemGroup>
+
   <!-- Shaders compiled ahead of time by Shaders/compile.sh (SPIR-V for Vulkan, DXIL for Direct3D 12). -->
   <ItemGroup>
     <EmbeddedResource Include="Shaders/Compiled/*" LogicalName="Shaders.%(Filename)%(Extension)" />

@@ -1,3 +1,5 @@
+using System.Numerics;
+using Elysium.Core.Client.Input;
 using SDL;
 
 namespace Elysium.Core.Client.Sdl;
@@ -36,22 +38,47 @@ public sealed unsafe class SdlWindow : IDisposable
         return new SdlWindow(window);
     }
 
-    /// <summary>Handles the pending window events. Returns false once the player asked to close the window.</summary>
-    public bool PollEvents()
+    /// <summary>
+    /// Starts a new frame of <paramref name="input"/> with what happened since the last one: the clicks, a request
+    /// to close, and the size of the drawing area. Click positions are in pixels of the drawing area, so they
+    /// match the scene on screens that scale the window (high DPI). Does not allocate.
+    /// </summary>
+    public void PollEvents(FrameInput input)
     {
+        ArgumentNullException.ThrowIfNull(input);
         ObjectDisposedException.ThrowIf(_window is null, this);
+        input.BeginFrame();
+        var pixelsPerPoint = SDL3.SDL_GetWindowPixelDensity(_window);
         SDL_Event sdlEvent;
-        var keepRunning = true;
         while (SDL3.SDL_PollEvent(&sdlEvent))
         {
-            if ((SDL_EventType)sdlEvent.type == SDL_EventType.SDL_EVENT_QUIT)
+            switch ((SDL_EventType)sdlEvent.type)
             {
-                keepRunning = false;
+                case SDL_EventType.SDL_EVENT_QUIT:
+                    input.RequestClose();
+                    break;
+                case SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN when ToPointerButton(sdlEvent.button.button) is { } button:
+                    input.AddClick(new Vector2(sdlEvent.button.x, sdlEvent.button.y) * pixelsPerPoint, button);
+                    break;
+                default:
+                    break;
             }
         }
 
-        return keepRunning;
+        int width;
+        int height;
+        if (SDL3.SDL_GetWindowSizeInPixels(_window, &width, &height))
+        {
+            input.SetViewport(width, height);
+        }
     }
+
+    private static PointerButton? ToPointerButton(byte sdlButton) => sdlButton switch
+    {
+        (byte)SDL3.SDL_BUTTON_LEFT => PointerButton.Primary,
+        (byte)SDL3.SDL_BUTTON_RIGHT => PointerButton.Secondary,
+        _ => null,
+    };
 
     public void SetTitle(string title) => SDL3.SDL_SetWindowTitle(_window, title);
 
