@@ -14,6 +14,7 @@
     <Project Path="tests/Elysium.Checks.Tests/Elysium.Checks.Tests.csproj" />
     <Project Path="tests/Elysium.Classic.Server.Tests/Elysium.Classic.Server.Tests.csproj" />
     <Project Path="tests/Elysium.Classic.Shared.Tests/Elysium.Classic.Shared.Tests.csproj" />
+    <Project Path="tests/Elysium.Core.Server.Tests/Elysium.Core.Server.Tests.csproj" />
     <Project Path="tests/Elysium.Core.Tests/Elysium.Core.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
