@@ -1,7 +1,7 @@
 ---
 id: 0000
 titulo: Servidor e bots
-status: aprovada
+status: em-andamento
 aprovada-em: 2026-11-17
 ---
 
