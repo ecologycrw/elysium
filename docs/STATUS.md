@@ -9,11 +9,11 @@ atualizado-em: 2026-11-17
 
 ## Agora
 
-**Fatia 0 (Servidor e bots): em implementação.** Ver [a spec](../specs/0000-servidor-e-bots/spec.md) e [o plano](../specs/0000-servidor-e-bots/plan.md). O andamento está no [tasks.md](../specs/0000-servidor-e-bots/tasks.md).
+**Fatia 0 (Servidor e bots): implementação concluída** (T01 a T12). Ver [a spec](../specs/0000-servidor-e-bots/spec.md) e [o plano](../specs/0000-servidor-e-bots/plan.md). Detalhes no [tasks.md](../specs/0000-servidor-e-bots/tasks.md).
 
 ## Próxima ação
 
-Continuar o `/implementar` da fatia 0 pela próxima tarefa pendente do `tasks.md`.
+`/revisar` a fatia 0 (revisão independente), depois `/fechar`.
 
 ## Bloqueios
 

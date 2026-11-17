@@ -64,7 +64,14 @@ Uma abstração só nasce quando o mesmo problema aparece pela terceira vez. Na 
 
 A IA imita o código que já existe. Por isso, os melhores exemplos de cada padrão são listados aqui conforme surgem (por exemplo: "para criar um novo tipo de mensagem, siga o arquivo X").
 
-*(Nenhum ainda.)*
+| Para... | Siga |
+|---|---|
+| criar uma mensagem de rede | `src/framework/Elysium.Classic.Shared/Messages/EntityMoved.cs` (e registre o tipo em `ClassicMessageTypes`) |
+| criar um ator com fila e tick | `src/framework/Elysium.Classic.Server/Maps/MapActor.cs` |
+| escrever regras de simulação determinísticas | `src/framework/Elysium.Classic.Server/Maps/MapSimulation.cs` |
+| testar a simulação com ticks controlados | `tests/Elysium.Classic.Server.Tests/Maps/MapMovementTests.cs` |
+| testar algo pela rede de verdade | `tests/Elysium.Core.Server.Tests/Sessions/GatewayTests.cs` |
+| escrever mensagens de log | `src/core/Elysium.Core.Server/Sessions/Gateway.cs` (`[LoggerMessage]`) |
 
 ## Testes
 

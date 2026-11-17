@@ -15,7 +15,7 @@ Legenda: `[ ]` pendente · `[~]` em andamento · `[x]` concluída · `[!]` bloqu
 - [x] T09: `Elysium.Core.Client`: conexão do cliente, login, envio e recebimento. Feita antes da T08, porque os testes do gateway usam esta conexão. Funciona sobre qualquer `Stream`, então o TLS entra depois sem mudar o resto. Verificação: usada pelos testes da T08 e da T11.
 - [x] T10: `tools/Elysium.Bot`: visão do mundo, comandos `walk` e `demo`. Verificação: build e testes da T11.
 - [x] T11: `samples/Elysium.Demo.Server` (mapa e números do jogo), inclusão em `Elysium.Architecture.Tests` (trava aprovada pelo dono em 2026-11-17) e teste de ponta a ponta com três bots (CA-10). Verificação: teste em `Elysium.Demo.Server.Tests`.
-- [ ] T12: Documentação: ARCHITECTURE, documento do módulo do servidor e do protocolo, código de referência em CONVENTIONS, TECH_DEBT. Verificação: `Elysium.Checks -- all`.
+- [x] T12: Documentação: ARCHITECTURE, documento do módulo do servidor e do protocolo (`docs/modules/servidor-e-protocolo.md`), código de referência em CONVENTIONS, TECH_DEBT (TD-0001 a TD-0006). Verificação: `Elysium.Checks -- all`.
 
 ## Bloqueios
 
@@ -30,3 +30,7 @@ Achados do revisor e o que foi feito com cada um. Preenchido pelo `/revisar`.
 - Desenho combinado no plano: a simulação só conhece o número do tick (sem relógio); o loop de ticks usa `TimeProvider` só na montagem. Por isso nenhum arquivo precisa da exceção de API proibida.
 - Pontos de entrada: o jogador entra no ponto `jogadores no mapa % quantidade de pontos`. Com o servidor vazio, Ana, Bruno e Caio entram nos pontos 0, 1 e 2; o mapa de demonstração põe 0 e 1 perto e 2 longe.
 - Faixas de tipo de mensagem: Núcleo 1–99, Classic 100–999, jogo 1000 em diante.
+- Todas as tarefas concluídas. Próxima etapa: `/revisar`.
+- Para o report: o plano falava em "envelope com tamanho, tipo e versão"; a versão ficou no primeiro campo do `LoginRequest`, não em cada envelope (evita 2 bytes por mensagem e é conferida antes de qualquer outra coisa). O efeito para o CA-02 é o mesmo.
+- Para o report: o `MovesRefused` do bot foi acrescentado depois do teste manual, porque o `walk` para um tile bloqueado esperava 60 segundos à toa.
+- Verificado à mão nesta sessão: servidor de demonstração + `demo` (PASSED, duas vezes no mesmo servidor) e `walk` (chegada e recusa). **Não verificado:** o desligamento com `Ctrl+C`, porque aqui o servidor foi parado à força; fica para o teste do dono (CA-11).
