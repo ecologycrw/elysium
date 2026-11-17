@@ -117,6 +117,19 @@ public sealed class GatewayTests : IAsyncLifetime
         Assert.Null(await client.ReceiveAsync(Token));
     }
 
+    [Theory]
+    [Trait("CA", "0000-CA-02")]
+    [InlineData("A")]
+    [InlineData("Abcdefg8")]
+    public async Task Names_of_one_character_and_of_the_maximum_length_are_accepted(string name)
+    {
+        await using var client = await ConnectAsync();
+
+        var result = await client.LoginAsync(name, Token);
+
+        Assert.True(result.IsAccepted);
+    }
+
     [Fact]
     [Trait("CA", "0000-CA-02")]
     public async Task A_name_already_online_is_refused_ignoring_case_and_free_again_after_leaving()

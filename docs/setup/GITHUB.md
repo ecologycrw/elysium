@@ -122,6 +122,16 @@ A IA envia a branch `preparacao/ambiente`, abre o PR #1 e confere:
 
 No PR: aba **Files changed → Review changes → Approve**. Depois, **Squash and merge**.
 
+## 10. Tornar o check de mutação obrigatório (dono, navegador)
+
+Desde a fatia 1, a CI tem o job `mutation` (testes de mutação; ver [DEV.md](DEV.md#testes-de-mutação)). Ele só bloqueia o merge depois que você o torna obrigatório. O GitHub só lista um check que já rodou pelo menos uma vez, então faça isto depois que o `mutation` aparecer num PR:
+
+1. **Settings → Rules → Rulesets** e abra a regra da `main`.
+2. Em **Require status checks to pass**, clique em **Add checks**, digite `mutation` e escolha o check.
+3. Clique em **Save changes**.
+
+O arquivo [`ruleset-main.json`](ruleset-main.json) já inclui o `mutation`, para quem criar a regra do zero.
+
 ## Renovação
 
 O login do `gh` da conta da IA não expira sozinho. Se algum dia ele sair, repita o passo 4.
