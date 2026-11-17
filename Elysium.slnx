@@ -11,12 +11,14 @@
     <Project Path="src/core/Elysium.Core/Elysium.Core.csproj" />
   </Folder>
   <Folder Name="/src/framework/">
+    <Project Path="src/framework/Elysium.Classic.Client/Elysium.Classic.Client.csproj" />
     <Project Path="src/framework/Elysium.Classic.Server/Elysium.Classic.Server.csproj" />
     <Project Path="src/framework/Elysium.Classic.Shared/Elysium.Classic.Shared.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Elysium.Architecture.Tests/Elysium.Architecture.Tests.csproj" />
     <Project Path="tests/Elysium.Checks.Tests/Elysium.Checks.Tests.csproj" />
+    <Project Path="tests/Elysium.Classic.Client.Tests/Elysium.Classic.Client.Tests.csproj" />
     <Project Path="tests/Elysium.Classic.Server.Tests/Elysium.Classic.Server.Tests.csproj" />
     <Project Path="tests/Elysium.Classic.Shared.Tests/Elysium.Classic.Shared.Tests.csproj" />
     <Project Path="tests/Elysium.Core.Server.Tests/Elysium.Core.Server.Tests.csproj" />

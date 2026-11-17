@@ -1,3 +1,4 @@
+using Elysium.Classic.Client.World;
 using Elysium.Classic.Shared.Grid;
 using Elysium.Classic.Shared.Messages;
 using Elysium.Core.Client.Connection;
@@ -7,12 +8,12 @@ namespace Elysium.Bot;
 
 /// <summary>
 /// A client without a screen: it logs in, walks when told to, and writes what it sees, one line per change.
-/// A background loop receives messages and updates its <see cref="WorldView"/>.
+/// A background loop receives messages and updates its <see cref="WorldState"/>, the same one the graphical client uses.
 /// </summary>
 public sealed class HeadlessBot : IAsyncDisposable
 {
     private readonly GameConnection _connection;
-    private readonly WorldView _view = new();
+    private readonly WorldState _world = new();
     private readonly Lock _gate = new();
     private readonly TextWriter _output;
     private readonly CancellationTokenSource _stopping = new();
@@ -31,11 +32,12 @@ public sealed class HeadlessBot : IAsyncDisposable
     /// <summary>False once the server closed the connection or sent something the bot could not read.</summary>
     public bool IsConnected => _isConnected;
 
-    public TilePosition? Position => ReadView(view => view.Position);
+    public TilePosition? Position => ReadWorld(world => world.SelfPosition);
 
-    public int MovesRefused => ReadView(view => view.MovesRefused);
+    public int MovesRefused => ReadWorld(world => world.MovesRefused);
 
-    public IReadOnlyCollection<string> VisibleNames => ReadView(view => view.VisibleNames);
+    public IReadOnlyCollection<string> VisibleNames =>
+        ReadWorld(world => (IReadOnlyCollection<string>)[.. world.VisibleEntities.Select(entity => entity.Name).Order(StringComparer.Ordinal)]);
 
     /// <summary>Connects and logs in. Throws <see cref="InvalidOperationException"/> when the server refuses the login.</summary>
     public static async Task<HeadlessBot> ConnectAsync(string host, int port, string name, TextWriter output, CancellationToken cancellationToken)
@@ -54,7 +56,7 @@ public sealed class HeadlessBot : IAsyncDisposable
         return bot;
     }
 
-    public bool Sees(string name) => ReadView(view => view.Sees(name));
+    public bool Sees(string name) => ReadWorld(world => world.VisibleEntities.Any(entity => entity.Name == name));
 
     public async Task WalkToAsync(TilePosition destination, CancellationToken cancellationToken)
     {
@@ -105,11 +107,7 @@ public sealed class HeadlessBot : IAsyncDisposable
         {
             while (await _connection.ReceiveAsync(_stopping.Token).ConfigureAwait(false) is { } frame)
             {
-                string? line;
-                lock (_gate)
-                {
-                    line = _view.Apply(frame);
-                }
+                var line = Describe(frame);
 
                 if (line is not null)
                 {
@@ -129,12 +127,29 @@ public sealed class HeadlessBot : IAsyncDisposable
         _isConnected = false;
     }
 
-    /// <summary>Reads the world view under the lock, because the receive loop changes it from another thread.</summary>
-    private T ReadView<T>(Func<WorldView, T> read)
+    /// <summary>Applies a message to the world and returns the line to write, if any.</summary>
+    private string? Describe(Frame frame)
+    {
+        if (!WorldState.Handles(frame.Type))
+        {
+            return $"received unknown message type {frame.Type}";
+        }
+
+        WorldChange? change;
+        lock (_gate)
+        {
+            change = _world.Apply(frame);
+        }
+
+        return change is { } happened ? BotNarration.Describe(happened) : null;
+    }
+
+    /// <summary>Reads the world under the lock, because the receive loop changes it from another thread.</summary>
+    private T ReadWorld<T>(Func<WorldState, T> read)
     {
         lock (_gate)
         {
-            return read(_view);
+            return read(_world);
         }
     }
 }
