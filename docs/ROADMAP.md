@@ -2,15 +2,18 @@
 
 > Muda só com aprovação do dono do produto. A cada retrospectiva, uma fatia passa de "Próximas" para "Agora" e é detalhada na sua spec.
 
+## Concluídas
+
+- **Preparação** (partes 1 a 4): documentos, esqueleto do código com as garantias automáticas, ambiente de IA e GitHub.
+
 ## Agora
 
-**Preparação** (partes 1 a 4): documentos, esqueleto do código com as garantias automáticas, ambiente de IA e GitHub. Ver [STATUS.md](STATUS.md).
+**Fatia 0: Servidor e bots.** Dois bots fazem login, andam pela grade e um vê o outro; um terceiro bot, longe, não vê nenhum deles. Tudo em testes automáticos, sem gráficos. Ver [a spec](../specs/0000-servidor-e-bots/spec.md) e o [STATUS.md](STATUS.md).
 
 ## Próximas
 
 | Fatia | Nome | O que entrega, do ponto de vista de quem testa |
 |---|---|---|
-| 0 | Servidor e bots | Dois bots fazem login, andam pela grade e um vê o outro; um terceiro bot, longe, não vê nenhum deles. Tudo em testes automáticos, sem gráficos |
 | 1 | Dois jogadores se veem | Janela, terreno, câmera 3/4, personagem simples e clicar para andar; dois clientes no mesmo mapa |
 | 2 | Caçar | Monstros com spawn e IA simples, combate autoritativo, EXP, drops no chão, inventário em grade e persistência com ledger |
 
