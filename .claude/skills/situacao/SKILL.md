@@ -1,11 +1,11 @@
 ---
-name: status
+name: situacao
 description: Mostra onde o projeto Elysium está e qual é a próxima ação, em português simples para o dono do produto. Use quando o dono perguntar "onde estamos", "o que falta", "qual o próximo passo" ou ao retomar o trabalho.
 ---
 
-# /status
+# /situacao
 
-Responde "onde estamos?" sem mudar nenhum arquivo.
+Responde "onde estamos?" sem mudar nenhum arquivo. (O nome não é `/status` porque esse já é um comando interno do Claude Code.)
 
 ## Passos
 

@@ -62,7 +62,7 @@ $allowed = @(
     'git push origin fatia/0000-main-loop',
     'git commit -q -m "feat(0000): T01 add main loop"',
     'git commit -m "docs(prep): update AGENTS.md" -m "Co-Authored-By: Claude <noreply@anthropic.com>"',
-    'git add .claude/skills/status/SKILL.md',
+    'git add .claude/skills/situacao/SKILL.md',
     'git config --get user.name',
     'git log --oneline -5',
     'git diff main...HEAD',

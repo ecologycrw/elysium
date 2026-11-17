@@ -1,7 +1,7 @@
 ---
-fase: preparacao
+fase: entre-fatias
 spec-atual:
-branch: preparacao/ambiente
+branch: main
 atualizado-em: 2026-11-17
 ---
 
@@ -9,11 +9,11 @@ atualizado-em: 2026-11-17
 
 ## Agora
 
-Preparação, **parte 4 de 4**: GitHub (repositório, proteções, login da IA, assinatura dos commits e PR #1). Ver [setup/GITHUB.md](setup/GITHUB.md). Quando o PR #2 for aprovado e mergeado, a preparação termina.
+**Preparação concluída** (PR #2 mergeado). Nenhuma fatia em andamento.
 
 ## Próxima ação
 
-Depois do merge do PR #2: `/planejar` a fatia 0 (servidor e bots).
+`/planejar` a fatia 0 (servidor e bots).
 
 ## Bloqueios
 
@@ -29,3 +29,5 @@ Nenhum.
 | 2026-11-17 | Parte 3 concluída: ambiente de IA; retrospectiva passa a rodar no mesmo PR da fatia, antes do merge |
 | 2026-11-17 | Parte 4: guia do GitHub e regra de proteção da `main` escritos; PR #1 aberto |
 | 2026-11-17 | PR #1 bloqueado por commits sem assinatura (feitos antes da chave); commits copiados assinados para `preparacao/assinada` e PR #2 aberto no lugar |
+| 2026-11-17 | PR #2 mergeado: preparação concluída |
+| 2026-11-17 | Skill `/status` renomeada para `/situacao`, porque o nome conflitava com o comando interno do Claude Code |

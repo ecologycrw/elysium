@@ -30,7 +30,7 @@ Engine open source em C# (.NET 10) para MMORPGs no estilo clássico, com servido
 
 ## Como trabalhar
 
-O ciclo de cada fatia: `/planejar` → `/implementar` → `/verificar` → `/revisar` → `/fechar` → o dono testa → `/retrospectiva` → o dono aprova e faz o merge. Também existem `/status`, `/propor` e `/consolidar`. Siga a skill da etapa em que você está.
+O ciclo de cada fatia: `/planejar` → `/implementar` → `/verificar` → `/revisar` → `/fechar` → o dono testa → `/retrospectiva` → o dono aprova e faz o merge. Também existem `/situacao`, `/propor` e `/consolidar`. Siga a skill da etapa em que você está.
 
 - Uma tarefa por vez, com um commit pequeno por tarefa. O `tasks.md` está sempre atualizado: ele é a memória entre sessões.
 - Antes de mudar algo, leia o código e os docs afetados. Siga o código de referência de `docs/CONVENTIONS.md`.
