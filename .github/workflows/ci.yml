@@ -1,0 +1,70 @@
+# Runs every check again, outside the development machine (docs/WORKFLOW.md, "Proteções em camadas").
+# The job names are required status checks in the main branch ruleset.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: build-test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Restore
+        run: dotnet restore Elysium.slnx
+      - name: Formatting
+        run: dotnet format whitespace Elysium.slnx --verify-no-changes
+      - name: Build
+        run: dotnet build Elysium.slnx --no-restore -c Release
+      - name: Tests
+        run: dotnet test --solution Elysium.slnx --no-build -c Release
+      - name: Docs and structure checks
+        run: dotnet run --project tools/Elysium.Checks --no-build -c Release -- all
+      - name: Claude Code hook tests
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests/hooks/guard-bash.tests.ps1
+
+  mermaid:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Install mermaid-cli
+        run: npm install --global @mermaid-js/mermaid-cli@12.2.0
+      - name: Render every diagram
+        run: node .github/scripts/check-mermaid.mjs
+
+  pr-summary:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Safety summary
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: dotnet run --project tools/Elysium.Checks -c Release -- pr-summary --base "origin/$BASE_REF"

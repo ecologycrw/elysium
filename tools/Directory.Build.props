@@ -1,0 +1,8 @@
+<Project>
+  <!-- Settings for development tools. Imports the root Directory.Build.props first. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <IsAotCompatible>false</IsAotCompatible>
+  </PropertyGroup>
+</Project>
