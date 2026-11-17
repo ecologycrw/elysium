@@ -6,27 +6,24 @@ namespace Elysium.Core.Tests.Login;
 public sealed class LoginMessageTests
 {
     [Fact]
-    [Trait("CA", "0000-CA-01")]
     public void Login_request_round_trips()
     {
         var sent = new LoginRequest(ProtocolVersion.Current, "Ana");
 
-        var received = ToFrame(sent).Decode<LoginRequest>();
+        var received = Frame.FromMessage(sent).Decode<LoginRequest>();
 
         Assert.Equal(sent, received);
     }
 
     [Fact]
-    [Trait("CA", "0000-CA-01")]
     public void Login_accepted_round_trips()
     {
         var sent = new LoginAccepted(new EntityId(7));
 
-        Assert.Equal(sent, ToFrame(sent).Decode<LoginAccepted>());
+        Assert.Equal(sent, Frame.FromMessage(sent).Decode<LoginAccepted>());
     }
 
     [Theory]
-    [Trait("CA", "0000-CA-02")]
     [InlineData(LoginRejectReason.VersionMismatch)]
     [InlineData(LoginRejectReason.InvalidName)]
     [InlineData(LoginRejectReason.NameTaken)]
@@ -34,11 +31,10 @@ public sealed class LoginMessageTests
     {
         var sent = new LoginRejected(reason);
 
-        Assert.Equal(sent, ToFrame(sent).Decode<LoginRejected>());
+        Assert.Equal(sent, Frame.FromMessage(sent).Decode<LoginRejected>());
     }
 
     [Fact]
-    [Trait("CA", "0000-CA-02")]
     public void The_protocol_version_is_readable_even_when_the_rest_is_unknown()
     {
         var writer = new MessageWriter();
@@ -49,7 +45,6 @@ public sealed class LoginMessageTests
     }
 
     [Fact]
-    [Trait("CA", "0000-CA-08")]
     public void An_unknown_reject_reason_throws_protocol_exception()
     {
         var frame = new Frame(LoginRejected.TypeId, new byte[] { 200 });
@@ -58,18 +53,41 @@ public sealed class LoginMessageTests
     }
 
     [Fact]
-    [Trait("CA", "0000-CA-08")]
     public void Decoding_a_frame_as_the_wrong_type_throws_protocol_exception()
     {
-        var frame = ToFrame(new LoginAccepted(new EntityId(1)));
+        var frame = Frame.FromMessage(new LoginAccepted(new EntityId(1)));
 
         Assert.Throws<ProtocolException>(() => frame.Decode<LoginRequest>());
     }
 
-    private static Frame ToFrame(IMessage message)
+    [Fact]
+    public void Core_message_type_numbers_never_change()
     {
-        var writer = new MessageWriter();
-        message.Write(writer);
-        return new Frame(message.MessageType, writer.WrittenSpan.ToArray());
+        Assert.Equal(1, LoginRequest.TypeId);
+        Assert.Equal(2, LoginAccepted.TypeId);
+        Assert.Equal(3, LoginRejected.TypeId);
     }
+
+    [Fact]
+    public void Login_request_bytes_are_fixed_with_the_version_first()
+    {
+        Assert.Equal([0x01, 0x00, 0x03, (byte)'A', (byte)'n', (byte)'a'], PayloadOf(new LoginRequest(1, "Ana")));
+    }
+
+    [Fact]
+    public void Login_accepted_bytes_are_fixed()
+    {
+        Assert.Equal([0x07, 0x00, 0x00, 0x00], PayloadOf(new LoginAccepted(new EntityId(7))));
+    }
+
+    [Theory]
+    [InlineData(LoginRejectReason.VersionMismatch, 0x01)]
+    [InlineData(LoginRejectReason.InvalidName, 0x02)]
+    [InlineData(LoginRejectReason.NameTaken, 0x03)]
+    public void Login_rejected_bytes_are_fixed(LoginRejectReason reason, byte expected)
+    {
+        Assert.Equal([expected], PayloadOf(new LoginRejected(reason)));
+    }
+
+    private static byte[] PayloadOf(IMessage message) => Frame.FromMessage(message).Payload.ToArray();
 }

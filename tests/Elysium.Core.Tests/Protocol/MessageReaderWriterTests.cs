@@ -27,7 +27,6 @@ public sealed class MessageReaderWriterTests
     }
 
     [Fact]
-    [Trait("CA", "0000-CA-08")]
     public void Reading_past_the_end_throws_protocol_exception()
     {
         var writer = new MessageWriter();
@@ -41,7 +40,6 @@ public sealed class MessageReaderWriterTests
     }
 
     [Fact]
-    [Trait("CA", "0000-CA-08")]
     public void A_string_longer_than_the_remaining_bytes_throws_protocol_exception()
     {
         byte[] data = [10, (byte)'a', (byte)'b'];
@@ -54,7 +52,6 @@ public sealed class MessageReaderWriterTests
     }
 
     [Fact]
-    [Trait("CA", "0000-CA-08")]
     public void Invalid_utf8_throws_protocol_exception()
     {
         byte[] data = [2, 0xC3, 0x28];
@@ -67,7 +64,6 @@ public sealed class MessageReaderWriterTests
     }
 
     [Fact]
-    [Trait("CA", "0000-CA-08")]
     public void Extra_bytes_after_the_last_field_throw_protocol_exception()
     {
         byte[] data = [1, 2, 3];

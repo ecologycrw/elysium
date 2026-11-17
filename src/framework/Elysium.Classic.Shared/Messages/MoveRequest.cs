@@ -14,5 +14,9 @@ public sealed record MoveRequest(TilePosition Destination) : IMessage<MoveReques
 
     public static MoveRequest Read(ref MessageReader reader) => new(reader.ReadTile());
 
-    public void Write(MessageWriter writer) => writer.WriteTile(Destination);
+    public void Write(MessageWriter writer)
+    {
+        ArgumentNullException.ThrowIfNull(writer);
+        writer.WriteTile(Destination);
+    }
 }

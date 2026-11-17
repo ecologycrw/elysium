@@ -5,23 +5,51 @@ namespace Elysium.Core.Server.Tests.Actors;
 
 public sealed class TickRunnerTests
 {
-    [Fact]
-    public async Task Ticks_run_one_at_a_time_until_cancelled()
+    private static readonly TimeSpan WaitLimit = TimeSpan.FromSeconds(10);
+
+    [Theory]
+    [InlineData(TickRunner.MinTicksPerSecond)]
+    [InlineData(TickRunner.MaxTicksPerSecond)]
+    public async Task One_second_of_time_runs_exactly_the_configured_number_of_ticks(int ticksPerSecond)
     {
-        var actor = new CountingActor();
-        var runner = new TickRunner(actor, ticksPerSecond: 20, TimeProvider.System, NullLogger<TickRunner>.Instance);
+        var time = new ManualTimeProvider();
+        using var actor = new CountingActor();
+        var runner = new TickRunner(actor, ticksPerSecond, time, NullLogger<TickRunner>.Instance);
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
-
         var running = runner.RunAsync(cancellation.Token);
-        await actor.WaitForTicksAsync(5, TimeSpan.FromSeconds(10));
-        await cancellation.CancelAsync();
-        await running;
-        var ticksAfterStop = actor.Ticks;
-        await Task.Delay(200, TestContext.Current.CancellationToken);
+        var interval = TimeSpan.FromSeconds(1.0 / ticksPerSecond);
 
-        Assert.True(actor.Ticks >= 5);
-        Assert.Equal(ticksAfterStop, actor.Ticks);
-        Assert.False(actor.Overlapped);
+        for (var tick = 1; tick <= ticksPerSecond; tick++)
+        {
+            time.Advance(interval);
+            await actor.WaitForTickAsync(WaitLimit);
+        }
+
+        await cancellation.CancelAsync();
+        await running.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
+
+        Assert.Equal(ticksPerSecond, actor.Ticks);
+    }
+
+    [Fact]
+    public async Task No_tick_runs_before_the_first_interval_ends_or_after_cancellation()
+    {
+        var time = new ManualTimeProvider();
+        using var actor = new CountingActor();
+        var runner = new TickRunner(actor, ticksPerSecond: 20, time, NullLogger<TickRunner>.Instance);
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        var running = runner.RunAsync(cancellation.Token);
+
+        time.Advance(TimeSpan.FromMilliseconds(49));
+        var ticksBeforeInterval = actor.Ticks;
+        time.Advance(TimeSpan.FromMilliseconds(1));
+        await actor.WaitForTickAsync(WaitLimit);
+        await cancellation.CancelAsync();
+        await running.WaitAsync(WaitLimit, TestContext.Current.CancellationToken);
+        time.Advance(TimeSpan.FromSeconds(1));
+
+        Assert.Equal(0, ticksBeforeInterval);
+        Assert.Equal(1, actor.Ticks);
     }
 
     [Theory]
@@ -30,44 +58,34 @@ public sealed class TickRunnerTests
     public void A_tick_rate_outside_10_to_20_per_second_is_refused(int ticksPerSecond)
     {
         Assert.Throws<ArgumentOutOfRangeException>(
-            () => new TickRunner(new CountingActor(), ticksPerSecond, TimeProvider.System, NullLogger<TickRunner>.Instance));
+            () => new TickRunner(new NoOpActor(), ticksPerSecond, TimeProvider.System, NullLogger<TickRunner>.Instance));
     }
 
-    private sealed class CountingActor : ITickable
+    private sealed class CountingActor : ITickable, IDisposable
     {
-        private readonly TaskCompletionSource _reached = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly SemaphoreSlim _ticked = new(0);
         private int _ticks;
-        private int _inside;
-        private int _target = int.MaxValue;
 
         public int Ticks => Volatile.Read(ref _ticks);
 
-        public bool Overlapped { get; private set; }
-
         public void Tick()
         {
-            if (Interlocked.Increment(ref _inside) > 1)
-            {
-                Overlapped = true;
-            }
-
-            if (Interlocked.Increment(ref _ticks) >= Volatile.Read(ref _target))
-            {
-                _reached.TrySetResult();
-            }
-
-            Interlocked.Decrement(ref _inside);
+            Interlocked.Increment(ref _ticks);
+            _ticked.Release();
         }
 
-        public async Task WaitForTicksAsync(int count, TimeSpan timeout)
+        public async Task WaitForTickAsync(TimeSpan limit)
         {
-            Volatile.Write(ref _target, count);
-            if (Ticks >= count)
-            {
-                return;
-            }
+            Assert.True(await _ticked.WaitAsync(limit, TestContext.Current.CancellationToken), "The expected tick did not run.");
+        }
 
-            await _reached.Task.WaitAsync(timeout);
+        public void Dispose() => _ticked.Dispose();
+    }
+
+    private sealed class NoOpActor : ITickable
+    {
+        public void Tick()
+        {
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace Elysium.Core.Login;
+namespace Elysium.Core.Protocol;
 
 /// <summary>
 /// Type numbers of the core messages (range 1-99).

@@ -26,6 +26,7 @@ public sealed record MoveRejected(TilePosition Destination, MoveRejectReason Rea
 
     public void Write(MessageWriter writer)
     {
+        ArgumentNullException.ThrowIfNull(writer);
         writer.WriteTile(Destination);
         writer.WriteByte((byte)Reason);
     }

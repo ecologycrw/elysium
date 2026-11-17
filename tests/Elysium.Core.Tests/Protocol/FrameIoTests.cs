@@ -28,7 +28,14 @@ public sealed class FrameIoTests
     }
 
     [Fact]
-    [Trait("CA", "0000-CA-08")]
+    public void The_frame_header_bytes_are_fixed()
+    {
+        // Length of type + payload (2 bytes), then the type (2 bytes), little-endian. This header never changes
+        // between protocol versions, so a client of any version can always reach the version check in the login.
+        Assert.Equal([0x05, 0x00, 0x2A, 0x01, 0x01, 0x02, 0x03], FrameIo.Encode(0x012A, [1, 2, 3]));
+    }
+
+    [Fact]
     public async Task A_frame_larger_than_the_limit_throws_protocol_exception()
     {
         using var stream = new MemoryStream(FrameIo.Encode(5, new byte[Limit]));
@@ -38,7 +45,6 @@ public sealed class FrameIoTests
     }
 
     [Fact]
-    [Trait("CA", "0000-CA-08")]
     public async Task A_frame_too_short_to_hold_a_type_throws_protocol_exception()
     {
         using var stream = new MemoryStream([1, 0, 9]);
@@ -48,7 +54,6 @@ public sealed class FrameIoTests
     }
 
     [Fact]
-    [Trait("CA", "0000-CA-08")]
     public async Task A_frame_cut_off_in_the_middle_throws_protocol_exception()
     {
         var bytes = FrameIo.Encode(5, [1, 2, 3, 4]);
@@ -59,7 +64,6 @@ public sealed class FrameIoTests
     }
 
     [Fact]
-    [Trait("CA", "0000-CA-08")]
     public async Task A_stream_that_ends_inside_the_length_field_throws_protocol_exception()
     {
         using var stream = new MemoryStream([4]);
