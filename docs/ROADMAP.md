@@ -9,13 +9,12 @@
 
 ## Agora
 
-Nenhuma fatia em andamento. A próxima é a **fatia 1**, decidida na retrospectiva da fatia 0. Ver o [STATUS.md](STATUS.md).
+**Fatia 1: Dois jogadores se veem.** Janela, terreno, câmera 3/4, personagem simples e clicar para andar; dois clientes no mesmo mapa. Inclui os testes de mutação nos projetos de servidor (proposta P-0003). Ver [a spec](../specs/0001-dois-jogadores-se-veem/spec.md) e o [STATUS.md](STATUS.md).
 
 ## Próximas
 
 | Fatia | Nome | O que entrega, do ponto de vista de quem testa |
 |---|---|---|
-| 1 | Dois jogadores se veem | Janela, terreno, câmera 3/4, personagem simples e clicar para andar; dois clientes no mesmo mapa. Inclui os testes de mutação nos projetos de servidor (proposta P-0003) |
 | 2 | Caçar | Monstros com spawn e IA simples, combate autoritativo, EXP, drops no chão, inventário em grade e persistência com ledger |
 
 ## Depois
