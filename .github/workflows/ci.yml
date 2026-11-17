@@ -37,6 +37,10 @@ jobs:
         run: dotnet test --solution Elysium.slnx --no-build -c Release
       - name: Docs and structure checks
         run: dotnet run --project tools/Elysium.Checks --no-build -c Release -- all
+      - name: Claude Code hook tests
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests/hooks/guard-bash.tests.ps1
 
   mermaid:
     runs-on: ubuntu-latest
