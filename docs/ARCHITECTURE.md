@@ -35,8 +35,8 @@ As dependências só descem (INV-02). Cada camada é um conjunto de projetos .NE
 |---|---|---|
 | `src/core/` | `Elysium.Core`, `Elysium.Core.Server`, `Elysium.Core.Client` | Núcleo |
 | `src/framework/` | `Elysium.Classic.Shared`, `Elysium.Classic.Server` (e `Elysium.Classic.Client` a partir da fatia 1) | Classic |
-| `samples/` | `Elysium.Demo.*` (a partir da fatia 0) | Jogo |
-| `tools/` | `Elysium.Checks`, `Elysium.Bot` (a partir da fatia 0) | Ferramentas |
+| `samples/` | `Elysium.Demo.Server` (o servidor do jogo de demonstração) | Jogo |
+| `tools/` | `Elysium.Checks`, `Elysium.Bot` (o bot headless) | Ferramentas |
 | `tests/` | `<Projeto>.Tests`, `Elysium.Architecture.Tests` | Testes |
 
 Regras de dependência:
@@ -119,10 +119,11 @@ O PostgreSQL é a fonte da verdade a partir da fatia 2. Antes disso, uma impleme
 
 ## Rede
 
-- **TCP primeiro**, atrás de uma interface de transporte. UDP, QUIC ou WebSocket entram só se uma medição pedir ([ADR 0005](adr/0005-tcp-primeiro.md)).
+- **TCP primeiro**, atrás de uma interface de transporte. UDP, QUIC ou WebSocket entram só se uma medição pedir ([ADR 0005](adr/0005-tcp-primeiro.md)). Hoje essa interface é um `Stream`: o gateway roda qualquer conexão que chegue como `Stream`, e o TCP é só quem as aceita.
 - Criptografia de verdade (TLS) antes de qualquer teste aberto ao público.
-- As mensagens são tipos C# na biblioteca compartilhada, com serialização gerada na compilação. O protocolo tem **versão explícita** (INV-11).
+- As mensagens são tipos C# na biblioteca compartilhada, com serialização gerada na compilação (por enquanto escrita à mão; ver [TECH_DEBT.md](TECH_DEBT.md)). O protocolo tem **versão explícita** (INV-11), conferida na primeira mensagem de cada conexão.
 - Envio só do que mudou, posições na grade em formato compacto e mensagens agrupadas por tick.
+- Como é agora (versão 1): ver [o documento do servidor e do protocolo](modules/servidor-e-protocolo.md).
 
 ## Conteúdo e lógica de jogo
 

@@ -24,11 +24,13 @@ Transforma o próximo item do roadmap numa spec e num plano aprovados. **Não im
    - o que a fatia entrega e como ele vai testar;
    - os critérios de aceitação em linguagem simples;
    - o que fica de fora;
-   - o que precisa da decisão dele (bibliotecas novas, ADRs, banco, protocolo).
+   - o que precisa da decisão dele (bibliotecas novas, ADRs, banco, protocolo);
+   - que, ao aprovar, a fatia passa para "Agora" no ROADMAP.
 
    Pergunte se ele aprova.
 8. **Só depois de um "sim" explícito:**
    - mude o status da spec para `aprovada` e preencha `aprovada-em`;
+   - no `docs/ROADMAP.md`, mova a fatia de "Próximas" para "Agora", com o link da spec, e a anterior para "Concluídas", se ainda não estiver lá. A aprovação da spec vale para essa mudança (proposta P-0001); qualquer outra mudança no ROADMAP continua precisando de aprovação própria;
    - atualize o STATUS (`spec-atual: NNNN`, `branch`, "Agora" e "Próxima ação");
    - commit `docs(NNNN): plan slice N` e `git push -u origin fatia/NNNN-nome`.
 
@@ -37,4 +39,4 @@ Se o dono pedir mudanças, ajuste a spec e o plano e volte ao passo 7.
 ## Nunca
 
 - Começar a implementar.
-- Mudar o ROADMAP ou a VISION sem a aprovação do dono.
+- Mudar o ROADMAP ou a VISION sem a aprovação do dono (mover a fatia aprovada para "Agora" já está coberto pela aprovação da spec).

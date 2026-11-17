@@ -19,4 +19,31 @@ Formato de cada entrada (o modelo completo fica em `templates/proposal.md`):
 
 ## Processadas
 
-*(nenhuma)*
+### P-0001: o /planejar move a fatia escolhida para "Agora" no ROADMAP
+- Origem: feedback do dono, no /planejar da fatia 0
+- Tipo: skill
+- Evidência: nas palavras do dono, "o /planejar deve sempre mover a fatia escolhida para 'Agora' no ROADMAP. Evidência: na fatia 0 foi preciso pedir isso manualmente." O passo a passo do `/planejar` não fala do ROADMAP, e a skill proíbe mudá-lo sem aprovação. Na fatia 0, o ROADMAP ainda mostrava a preparação em "Agora" até o dono pedir a mudança. A aprovação da spec poderia valer também para essa atualização.
+- Prioridade sugerida: média
+- Status: aceita
+- Destino: skill. Aplicada na retrospectiva da fatia 0: o `/planejar` move a fatia para "Agora" quando o dono aprova a spec.
+
+### P-0002: régua de qualidade sênior
+- Origem: feedback do dono, no fim da implementação da fatia 0
+- Tipo: regra e trava
+- Evidência: o dono não lê código e quer garantir o padrão sênior antes que a fatia 1 copie os padrões da fatia 0. O pedido dele tem três partes:
+  1. Uma seção curta "Régua de qualidade" no `docs/CONVENTIONS.md`, com o que um revisor sênior recusaria no Elysium: funções longas, classes com mais de uma responsabilidade, código repetido, tratamento de erro que esconde o problema, nomes vagos (`Manager`, `Helper`, `Data`) e testes que verificam a implementação em vez do comportamento.
+  2. Esses itens na lista obrigatória do subagente `revisor`.
+  3. Os analisadores de complexidade do .NET ligados (CA1502, CA1505, CA1506), com limites calibrados no código da fatia 0.
+
+  As partes 2 e 3 mexem em travas (`.claude/agents/` e a configuração de análise) e precisam da aprovação do dono. Como a prioridade é alta e o objetivo é chegar antes da fatia 1, a retrospectiva da fatia 0 pode decidir aplicá-la ainda neste PR.
+- Prioridade sugerida: alta
+- Status: aceita
+- Destino: regra e trava. Aplicada na retrospectiva da fatia 0: seção "Régua de qualidade" no `docs/CONVENTIONS.md`, item 7 na lista obrigatória do `revisor` e CA1502, CA1505 e CA1506 ligados no `.editorconfig` com os limites padrão do .NET, por decisão do dono. Nenhum código da fatia 0 passou dos limites, então nada precisou ser afrouxado.
+
+### P-0003: testes de mutação com Stryker.NET
+- Origem: feedback do dono, no fim da implementação da fatia 0
+- Tipo: trava
+- Evidência: nas palavras do dono, "o risco de testes que passam sem verificar nada não é pego pelo build nem pela CI". O pedido é usar testes de mutação para provar que os testes detectam erros de verdade, começando pelos projetos de servidor (`Elysium.Core.Server` e `Elysium.Classic.Server`). O [ADR 0009](adr/0009-ferramentas-de-verificacao.md) já prevê o Stryker.NET "mais adiante". Ele é uma ferramenta externa nova, e rodá-lo na CI muda uma trava (`.github/`). As duas coisas precisam da aprovação do dono. Também falta decidir a nota mínima de mutação e se ela bloqueia o PR ou só aparece no relatório.
+- Prioridade sugerida: média
+- Status: aceita
+- Destino: fatia 1, como tarefa de trava. O dono aprova a ferramenta e a nota mínima junto com a spec da fatia 1.

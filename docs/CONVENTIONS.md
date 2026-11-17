@@ -50,6 +50,19 @@ Formato: `tipo(escopo): descrição curta em inglês`
 - Estado mutável compartilhado entre mapas.
 - Otimização sem medição.
 
+## Régua de qualidade
+
+O que um revisor sênior recusaria no Elysium, mesmo com o build e os testes verdes (proposta P-0002):
+
+- **Função longa:** um método que faz várias etapas em sequência. Cada etapa vira um método com nome (exemplo: `Gateway.LoginAsync` e `PlayAsync`).
+- **Classe com mais de uma responsabilidade:** se a descrição da classe precisa de "e também", ela se divide (exemplo: `MapSimulation` cuida de entrar, sair e andar; `AreaOfInterest`, de quem vê quem).
+- **Código repetido:** na terceira cópia, vira um método só (ver a [regra de três](#regra-de-três)).
+- **Tratamento de erro que esconde o problema:** `catch` que engole a exceção sem registrar nem reagir, ou que pega mais do que sabe tratar. Todo `catch` amplo diz no comentário por que é amplo.
+- **Nome vago:** `Manager`, `Helper`, `Data`, `Info`, `Util`, `Handler`, `scratch`, `temp`. O nome diz o que a coisa é ou faz (`_pathBuffer`, não `_scratch`).
+- **Teste que verifica a implementação e não o comportamento:** o teste confere o que o sistema entrega (as mensagens enviadas, a posição, os bytes do protocolo), não como ele faz por dentro. Teste de ida e volta não basta para protocolo: os bytes são fixados.
+
+Uma parte é verificada por máquina: os analisadores de complexidade (CA1502, CA1505 e CA1506) usam os limites padrão do .NET e falham o build. Um código que passa de um limite é melhorado; o limite só é afrouxado com um motivo real aprovado pelo dono. O resto é conferido pelo revisor, na lista obrigatória dele.
+
 ## APIs proibidas na simulação
 
 Os projetos `*.Server` e `*.Shared` não podem usar relógio do sistema, `Random`, locks, `Thread.Sleep` nem console (lista em `src/BannedSymbols.txt`; INV-03 e INV-04). O build falha se alguém usar.
@@ -64,7 +77,16 @@ Uma abstração só nasce quando o mesmo problema aparece pela terceira vez. Na 
 
 A IA imita o código que já existe. Por isso, os melhores exemplos de cada padrão são listados aqui conforme surgem (por exemplo: "para criar um novo tipo de mensagem, siga o arquivo X").
 
-*(Nenhum ainda.)*
+| Para... | Siga |
+|---|---|
+| criar uma mensagem de rede | `src/framework/Elysium.Classic.Shared/Messages/EntityMoved.cs` (registre o tipo em `ClassicMessageTypes` e fixe os bytes num teste, como em `ClassicMessageTests`) |
+| criar um ator com fila e tick (com limite de trabalho por tick e por jogador) | `src/framework/Elysium.Classic.Server/Maps/MapActor.cs` |
+| escrever regras de simulação determinísticas | `src/framework/Elysium.Classic.Server/Maps/MapSimulation.cs`, que delega a visibilidade a `AreaOfInterest.cs` |
+| testar a simulação com ticks controlados | `tests/Elysium.Classic.Server.Tests/Maps/MapMovementTests.cs` |
+| provar determinismo entre processos | `tests/Elysium.Classic.Server.Tests/Maps/MapActorTests.cs` (hash gravado da sequência de mensagens) |
+| testar algo que depende de tempo real | `tests/Elysium.Core.Server.Tests/Actors/TickRunnerTests.cs`, com o `ManualTimeProvider` |
+| testar algo pela rede de verdade | `tests/Elysium.Core.Server.Tests/Sessions/GatewayTests.cs` |
+| escrever mensagens de log | `src/core/Elysium.Core.Server/Sessions/Gateway.cs` (`[LoggerMessage]`) |
 
 ## Testes
 

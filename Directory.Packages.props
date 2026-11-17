@@ -5,6 +5,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0" />
+    <!-- Logging: approved by the owner on 2026-11-17 (slice 0). Abstractions in server code, Console only in hosts. -->
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.6" />
     <PackageVersion Include="TngTech.ArchUnitNET" Version="0.13.5" />
     <PackageVersion Include="xunit.v3" Version="4.0.3" />
   </ItemGroup>

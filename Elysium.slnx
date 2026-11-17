@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/Elysium.Demo.Server/Elysium.Demo.Server.csproj" />
+  </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/core/">
     <Project Path="src/core/Elysium.Core.Client/Elysium.Core.Client.csproj" />
@@ -12,8 +15,14 @@
   <Folder Name="/tests/">
     <Project Path="tests/Elysium.Architecture.Tests/Elysium.Architecture.Tests.csproj" />
     <Project Path="tests/Elysium.Checks.Tests/Elysium.Checks.Tests.csproj" />
+    <Project Path="tests/Elysium.Classic.Server.Tests/Elysium.Classic.Server.Tests.csproj" />
+    <Project Path="tests/Elysium.Classic.Shared.Tests/Elysium.Classic.Shared.Tests.csproj" />
+    <Project Path="tests/Elysium.Core.Server.Tests/Elysium.Core.Server.Tests.csproj" />
+    <Project Path="tests/Elysium.Core.Tests/Elysium.Core.Tests.csproj" />
+    <Project Path="tests/Elysium.Demo.Server.Tests/Elysium.Demo.Server.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
+    <Project Path="tools/Elysium.Bot/Elysium.Bot.csproj" />
     <Project Path="tools/Elysium.Checks/Elysium.Checks.csproj" />
   </Folder>
 </Solution>
