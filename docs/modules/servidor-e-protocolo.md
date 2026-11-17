@@ -12,11 +12,12 @@ Recebe conexões, faz o login, roda cada mapa como um ator por ticks e decide so
 |---|---|---|
 | `Elysium.Core` | Núcleo | `EntityId`; protocolo: envelope, leitor e escritor binários, versão; mensagens de login |
 | `Elysium.Core.Server` | Núcleo | fila do ator (`Mailbox`), loop de ticks (`TickRunner`), gateway e sessões, transporte TCP |
-| `Elysium.Core.Client` | Núcleo | `GameConnection`: conectar, login, enviar e receber |
+| `Elysium.Core.Client` | Núcleo | `GameConnection`: conectar, login, enviar e receber (o resto do cliente: ver [o documento do cliente](cliente.md)) |
 | `Elysium.Classic.Shared` | Classic | `TilePosition`, `GridMap`, formato de texto do mapa, mensagens de movimento e visibilidade |
 | `Elysium.Classic.Server` | Classic | `MapActor` e `MapSimulation`: entrada, saída, caminho, movimento e AOI |
-| `Elysium.Demo.Server` | Jogo | o mapa e os números do jogo de demonstração, e o programa do servidor |
-| `Elysium.Bot` | Ferramenta | bot headless, com os comandos `walk` e `demo` |
+| `Elysium.Demo.Shared` | Jogo | o mapa, a porta, os ticks e a velocidade de um passo, os mesmos para o servidor e o cliente |
+| `Elysium.Demo.Server` | Jogo | os números que só o servidor usa (raio de visão, limites) e o programa do servidor |
+| `Elysium.Bot` | Ferramenta | bot headless, com os comandos `walk` e `demo`; usa o estado do mundo do cliente |
 
 ## Conceitos
 
@@ -63,7 +64,7 @@ tiles
 
 ## Como usar
 
-O servidor de demonstração monta tudo em `samples/Elysium.Demo.Server/DemoServer.cs`. Os números do jogo ficam em `DemoGame.cs`.
+O servidor de demonstração monta tudo em `samples/Elysium.Demo.Server/DemoServer.cs`. Os números que só o servidor usa ficam em `DemoGame.cs`; os que o cliente também precisa, em `samples/Elysium.Demo.Shared/DemoWorld.cs`.
 
 ## Invariantes relevantes
 

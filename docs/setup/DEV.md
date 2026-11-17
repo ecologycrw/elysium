@@ -7,6 +7,7 @@
 - Git.
 - GitHub CLI (`gh`), para abrir e acompanhar PRs.
 - Node.js LTS: opcional, só para validar os diagramas Mermaid localmente (a CI sempre valida).
+- Windows SDK e Vulkan SDK: só para recompilar os shaders do cliente (`sh src/core/Elysium.Core.Client.Sdl/Shaders/compile.sh`). Os compilados ficam no repositório, então o build não precisa deles (TD-0010).
 
 ## Primeira vez num clone
 
@@ -27,6 +28,8 @@ A identidade dos commits da IA e a assinatura dos commits são configuradas só 
 | Checagens de docs e estrutura | `dotnet run --project tools/Elysium.Checks -- all` |
 | Conferir a formatação | `dotnet format whitespace Elysium.slnx --verify-no-changes` |
 | Corrigir a formatação | `dotnet format whitespace Elysium.slnx` |
+| Servidor de demonstração | `dotnet run --project samples/Elysium.Demo.Server` |
+| Cliente de demonstração (com o servidor ligado) | `dotnet run --project samples/Elysium.Demo.Client -- --name Ana` |
 
 Os testes rodam na Microsoft Testing Platform, ativada no `global.json`; por isso o `dotnet test` usa `--solution`.
 
