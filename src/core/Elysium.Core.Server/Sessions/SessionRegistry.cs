@@ -26,7 +26,7 @@ public sealed class SessionRegistry : IClientOutbox
     {
         if (_sessions.TryGetValue(client, out var session))
         {
-            session.Close(reason);
+            session.Abort(reason);
         }
     }
 

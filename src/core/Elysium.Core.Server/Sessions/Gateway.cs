@@ -8,7 +8,8 @@ namespace Elysium.Core.Server.Sessions;
 /// Runs every client connection: reads messages outside the tick, does the login, and then forwards the
 /// player's messages to the <see cref="IWorld"/>, which queues them for its actor.
 /// Anything invalid (a message before the login, a frame over the size limit, a truncated message)
-/// closes only that connection.
+/// closes only that connection. The client always receives <see cref="LoginAccepted"/> before anything
+/// the world sends.
 /// </summary>
 public sealed partial class Gateway
 {
@@ -38,57 +39,25 @@ public sealed partial class Gateway
     {
         ArgumentNullException.ThrowIfNull(stream);
         var id = new EntityId(Interlocked.Increment(ref _lastEntityId));
-        using var session = new Session(id, stream);
+        using var session = new Session(id, stream, _options.MaxQueuedFramesPerClient, stopping);
         var writer = session.RunWriterAsync();
         using var reading = CancellationTokenSource.CreateLinkedTokenSource(stopping, session.Closed);
-        string? name = null;
-        var joined = false;
 
         try
         {
-            name = await LoginAsync(session, stream, reading.Token).ConfigureAwait(false);
-            if (name is null)
+            var name = await LoginAsync(session, stream, reading.Token).ConfigureAwait(false);
+            if (name is not null)
             {
-                return;
+                await PlayAsync(session, stream, name, reading.Token).ConfigureAwait(false);
             }
-
-            _world.PlayerJoined(id, name);
-            joined = true;
-            LogJoined(id, name);
-
-            while (await FrameIo.ReadAsync(stream, _options.MaxFrameBodySize, reading.Token).ConfigureAwait(false) is { } frame)
-            {
-                _world.PlayerFrame(id, frame);
-            }
-
-            session.Close("the client closed the connection");
         }
-        catch (ProtocolException exception)
+        catch (Exception exception) when (IsConnectionEnd(exception))
         {
-            LogProtocolViolation(id, exception.Message);
-            session.Close(exception.Message);
-        }
-        catch (Exception exception) when (exception is IOException or ObjectDisposedException or OperationCanceledException)
-        {
-            session.Close("the connection was closed");
+            EndSession(session, exception);
         }
         finally
         {
-            if (joined)
-            {
-                _world.PlayerLeft(id);
-            }
-
-            if (name is not null)
-            {
-                _registry.Unregister(session, name);
-            }
-
             await writer.ConfigureAwait(false);
-            if (joined)
-            {
-                LogLeft(id, session.CloseReason ?? "unknown");
-            }
         }
     }
 
@@ -130,6 +99,35 @@ public sealed partial class Gateway
         return request.CharacterName;
     }
 
+    /// <summary>
+    /// The player is in the world: forwards every message until the connection ends, then takes the player out.
+    /// The name is free again before the world hears that the player left.
+    /// </summary>
+    private async Task PlayAsync(Session session, Stream stream, string name, CancellationToken cancellationToken)
+    {
+        _world.PlayerJoined(session.Id, name);
+        LogJoined(session.Id, name);
+        try
+        {
+            while (await FrameIo.ReadAsync(stream, _options.MaxFrameBodySize, cancellationToken).ConfigureAwait(false) is { } frame)
+            {
+                _world.PlayerFrame(session.Id, frame);
+            }
+
+            session.Close("the client closed the connection");
+        }
+        catch (Exception exception) when (IsConnectionEnd(exception))
+        {
+            EndSession(session, exception);
+        }
+        finally
+        {
+            _registry.Unregister(session, name);
+            _world.PlayerLeft(session.Id);
+            LogLeft(session.Id, session.CloseReason ?? "unknown");
+        }
+    }
+
     private string? Refuse(Session session, LoginRejectReason reason)
     {
         LogLoginRefused(session.Id, reason);
@@ -137,6 +135,22 @@ public sealed partial class Gateway
         session.Close($"login refused: {reason}");
         return null;
     }
+
+    private void EndSession(Session session, Exception exception)
+    {
+        if (exception is ProtocolException protocolError)
+        {
+            LogProtocolViolation(session.Id, protocolError.Message);
+            session.Abort(protocolError.Message);
+        }
+        else
+        {
+            session.Close("the connection was closed");
+        }
+    }
+
+    private static bool IsConnectionEnd(Exception exception) =>
+        exception is ProtocolException or IOException or ObjectDisposedException or OperationCanceledException;
 
     private bool IsValidName(string name) =>
         name.Length >= 1 && name.Length <= _options.MaxNameLength && name.All(char.IsAsciiLetterOrDigit);
@@ -147,9 +161,9 @@ public sealed partial class Gateway
     [LoggerMessage(Level = LogLevel.Information, Message = "Entity {Id} left: {Reason}")]
     private partial void LogLeft(EntityId id, string reason);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Login of connection {Id} refused: {Reason}")]
+    [LoggerMessage(Level = LogLevel.Information, Message = "Login refused for entity {Id}: {Reason}")]
     private partial void LogLoginRefused(EntityId id, LoginRejectReason reason);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Connection {Id} sent an invalid message and was closed: {Detail}")]
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Entity {Id} sent an invalid message and was disconnected: {Detail}")]
     private partial void LogProtocolViolation(EntityId id, string detail);
 }

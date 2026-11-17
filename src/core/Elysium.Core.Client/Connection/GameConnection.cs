@@ -46,16 +46,16 @@ public sealed class GameConnection : IAsyncDisposable
     /// <summary>
     /// Sends the login request and waits for the answer. After a refusal the server closes the connection.
     /// </summary>
-    public async Task<LoginResult> LoginAsync(string characterName, CancellationToken cancellationToken, ushort protocolVersion = ProtocolVersion.Current)
+    public async Task<LoginResult> LoginAsync(string characterName, CancellationToken cancellationToken)
     {
-        await SendAsync(new LoginRequest(protocolVersion, characterName), cancellationToken).ConfigureAwait(false);
+        await SendAsync(new LoginRequest(ProtocolVersion.Current, characterName), cancellationToken).ConfigureAwait(false);
         var answer = await ReceiveAsync(cancellationToken).ConfigureAwait(false)
             ?? throw new ProtocolException("The server closed the connection without answering the login.");
 
         return answer.Type switch
         {
-            CoreMessageTypes.LoginAccepted => new LoginResult(answer.Decode<LoginAccepted>().EntityId, null),
-            CoreMessageTypes.LoginRejected => new LoginResult(null, answer.Decode<LoginRejected>().Reason),
+            CoreMessageTypes.LoginAccepted => LoginResult.Accepted(answer.Decode<LoginAccepted>().EntityId),
+            CoreMessageTypes.LoginRejected => LoginResult.Rejected(answer.Decode<LoginRejected>().Reason),
             _ => throw new ProtocolException($"Expected a login answer, got message type {answer.Type}."),
         };
     }

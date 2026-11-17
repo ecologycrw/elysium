@@ -24,7 +24,7 @@ public sealed class GatewayTests : IAsyncLifetime
 
     public ValueTask InitializeAsync()
     {
-        var gateway = new Gateway(_registry, _world, new GatewayOptions(MaxFrameBodySize, maxNameLength: 8), NullLogger<Gateway>.Instance);
+        var gateway = new Gateway(_registry, _world, Options(maxQueuedFramesPerClient: 16), NullLogger<Gateway>.Instance);
         _listener = TcpGatewayListener.Start(gateway, new IPEndPoint(IPAddress.Loopback, 0), NullLogger<TcpGatewayListener>.Instance);
         return ValueTask.CompletedTask;
     }
@@ -56,11 +56,49 @@ public sealed class GatewayTests : IAsyncLifetime
     {
         await using var client = await ConnectAsync();
 
-        var result = await client.LoginAsync("Ana", Token, protocolVersion: ProtocolVersion.Current + 1);
+        await client.SendAsync(new LoginRequest(ProtocolVersion.Current + 1, "Ana"), Token);
+        var answer = await client.ReceiveAsync(Token);
 
-        Assert.Equal(LoginRejectReason.VersionMismatch, result.RejectReason);
+        Assert.Equal(new LoginRejected(LoginRejectReason.VersionMismatch), answer!.Value.Decode<LoginRejected>());
         Assert.Null(await client.ReceiveAsync(Token));
         Assert.Empty(_world.Events);
+    }
+
+    [Fact]
+    [Trait("CA", "0000-CA-08")]
+    public async Task A_client_that_stops_reading_is_disconnected_instead_of_filling_the_server_memory()
+    {
+        using var raw = await ConnectRawAsync(receiveBufferSize: 1024);
+        await using var client = new GameConnection(raw.GetStream());
+        var id = (await client.LoginAsync("Slow", Token)).EntityId!.Value;
+
+        for (var i = 0; i < 2000 && _registry.Count > 0; i++)
+        {
+            _registry.Send(id, new BlobMessage(60_000));
+        }
+
+        await _world.WaitForAsync($"left {id}");
+    }
+
+    [Fact]
+    public async Task The_server_stops_even_when_a_client_stopped_reading()
+    {
+        var registry = new SessionRegistry();
+        var world = new FakeWorld();
+        var gateway = new Gateway(registry, world, Options(maxQueuedFramesPerClient: 100_000), NullLogger<Gateway>.Instance);
+        var listener = TcpGatewayListener.Start(gateway, new IPEndPoint(IPAddress.Loopback, 0), NullLogger<TcpGatewayListener>.Instance);
+        using var raw = new TcpClient { ReceiveBufferSize = 1024 };
+        await raw.ConnectAsync(IPAddress.Loopback, listener.LocalEndPoint.Port, Token);
+        await using var client = new GameConnection(raw.GetStream());
+        var id = (await client.LoginAsync("Slow", Token)).EntityId!.Value;
+        for (var i = 0; i < 500; i++)
+        {
+            registry.Send(id, new BlobMessage(60_000));
+        }
+
+        await listener.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(10), Token);
+
+        await world.WaitForAsync($"left {id}");
     }
 
     [Theory]
@@ -157,7 +195,7 @@ public sealed class GatewayTests : IAsyncLifetime
         var badId = (await bad.LoginAsync("Bad", Token)).EntityId;
         var goodId = (await good.LoginAsync("Good", Token)).EntityId;
 
-        await bad.SendAsync(new OversizedMessage(), Token);
+        await bad.SendAsync(new BlobMessage(MaxFrameBodySize), Token);
         await good.SendAsync(new LoginAccepted(new EntityId(1)), Token);
 
         Assert.Null(await bad.ReceiveAsync(Token));
@@ -181,20 +219,24 @@ public sealed class GatewayTests : IAsyncLifetime
 
     private Task<GameConnection> ConnectAsync() => GameConnection.ConnectTcpAsync("127.0.0.1", Port, Token);
 
-    private async Task<TcpClient> ConnectRawAsync()
+    private static GatewayOptions Options(int maxQueuedFramesPerClient) =>
+        new(MaxFrameBodySize, maxNameLength: 8, maxQueuedFramesPerClient);
+
+    private async Task<TcpClient> ConnectRawAsync(int receiveBufferSize = 8192)
     {
-        var client = new TcpClient();
+        var client = new TcpClient { ReceiveBufferSize = receiveBufferSize };
         await client.ConnectAsync(IPAddress.Loopback, Port, Token);
         return client;
     }
 
-    private sealed class OversizedMessage : IMessage
+    /// <summary>A game message of any size, used to go over limits.</summary>
+    private sealed class BlobMessage(int payloadSize) : IMessage
     {
         public ushort MessageType => SomeGameMessage;
 
         public void Write(MessageWriter writer)
         {
-            for (var i = 0; i < MaxFrameBodySize; i++)
+            for (var i = 0; i < payloadSize; i++)
             {
                 writer.WriteByte(0);
             }

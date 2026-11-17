@@ -19,7 +19,7 @@ public static class DemoGame
     /// <summary>A normal client sends at most one move request per tick; 16 waiting messages leaves room for bursts.</summary>
     public static MapActorLimits MapActorLimits { get; } = new(maxCommandsPerTick: 2000, maxPendingFramesPerPlayer: 16);
 
-    public static GatewayOptions GatewayOptions { get; } = new(maxFrameBodySize: 512, maxNameLength: 16);
+    public static GatewayOptions GatewayOptions { get; } = new(maxFrameBodySize: 512, maxNameLength: 16, maxQueuedFramesPerClient: 1024);
 
     /// <summary>Reads the demo map, which is built into the program.</summary>
     public static GridMap LoadMap()

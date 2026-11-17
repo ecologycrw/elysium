@@ -18,7 +18,7 @@ public sealed partial class TcpGatewayListener : IAsyncDisposable
     private readonly CancellationTokenSource _stopping = new();
     private readonly ConcurrentDictionary<int, Task> _connections = new();
     private readonly Task _acceptLoop;
-    private int _lastConnection;
+    private int _lastConnectionNumber;
 
     private TcpGatewayListener(TcpListener listener, Gateway gateway, ILogger logger)
     {
@@ -70,22 +70,36 @@ public sealed partial class TcpGatewayListener : IAsyncDisposable
             }
 
             client.NoDelay = true;
-            var number = Interlocked.Increment(ref _lastConnection);
-            _connections[number] = RunAsync(number, client);
+            var connectionNumber = ++_lastConnectionNumber;
+
+            // Registered before it starts, so a connection that ends at once is still removed from the set.
+            var connection = new Task<Task>(() => RunAsync(connectionNumber, client));
+            _connections[connectionNumber] = connection.Unwrap();
+            connection.Start(TaskScheduler.Default);
         }
     }
 
-    private async Task RunAsync(int number, TcpClient client)
+    private async Task RunAsync(int connectionNumber, TcpClient client)
     {
-        await Task.Yield();
-        using (client)
+        try
         {
             await _gateway.RunConnectionAsync(client.GetStream(), _stopping.Token).ConfigureAwait(false);
         }
-
-        _connections.TryRemove(number, out _);
+        catch (Exception exception)
+        {
+            // The last guard of a connection: an unexpected error is logged, not lost, and does not stop the shutdown.
+            LogConnectionFailed(connectionNumber, exception);
+        }
+        finally
+        {
+            client.Dispose();
+            _connections.TryRemove(connectionNumber, out _);
+        }
     }
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Waiting for connections on {EndPoint}")]
     private partial void LogListening(IPEndPoint endPoint);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Connection {ConnectionNumber} failed unexpectedly")]
+    private partial void LogConnectionFailed(int connectionNumber, Exception exception);
 }
